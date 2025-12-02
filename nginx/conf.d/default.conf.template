@@ -1,10 +1,6 @@
-# Define upstreams para los servicios de DSpace
-upstream dspace_backend {
-    server dspace-backend:8080;
-}
-
+# Define upstream para el frontend de DSpace
 upstream dspace_frontend {
-    server dspace-frontend:4000;
+    server frontend-ui:4000;
 }
 
 # Configuración para WebSocket connections
@@ -39,29 +35,8 @@ server {
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
 
-    # Proxy para la API del backend de DSpace
-    # Mapear /server/ directamente al backend que mantiene /server/ en su contexto
-    location /server/ {
-        # No reescribir la URL - DSpace mantiene /server/ en el backend
-        proxy_pass http://dspace_backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Port 443;
-        
-        # Configuraciones adicionales para DSpace
-        proxy_redirect off;
-        proxy_buffering off;
-        proxy_request_buffering off;
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 300s;
-    }
-
     # Proxy para la interfaz de usuario de DSpace
-    # Todas las demás peticiones irán al contenedor del frontend
+    # Todas las peticiones irán al contenedor del frontend
     location / {
         proxy_pass http://dspace_frontend;
         proxy_set_header Host localhost;
