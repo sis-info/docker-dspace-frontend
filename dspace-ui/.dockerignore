@@ -1,0 +1,29 @@
+# Ignorar archivos innecesarios durante el build
+# No ignorar src/ ya que contiene el código fuente
+
+# Archivos de desarrollo
+*.md
+*.log
+.DS_Store
+Thumbs.db
+.idea
+
+*.swp
+*.swo
+
+# Archivos git (el código ya está local)
+
+
+# Node modules y dist del host (se generan en el contenedor)
+src/node_modules
+src/dist
+
+# Archivos de test
+src/cypress
+src/coverage
+src/*.spec.ts
+
+# Archivos temporales
+*.tmp
+*.temp
+

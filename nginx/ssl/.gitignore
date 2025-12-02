@@ -1,0 +1,9 @@
+# Ignorar todos los certificados SSL pero mantener la carpeta
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Mantener el archivo .gitignore
+!.gitignore

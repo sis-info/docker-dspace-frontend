@@ -1,0 +1,35 @@
+{
+    "apps": [
+        {
+            "name": "dspace-ui",
+            "cwd": "/dspace-ui-deploy",
+            "script": "dist/server/main.js",
+            "instances": "max",
+            "exec_mode": "cluster",
+            "env": {
+                "NODE_ENV": "${NODE_ENV}",
+                "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+                "DSPACE_REST_SSL": "${DSPACE_REST_SSL}",
+                "DSPACE_REST_HOST": "${DSPACE_REST_HOST}",
+                "DSPACE_REST_PORT": "${DSPACE_REST_PORT}",
+                "DSPACE_REST_NAMESPACE": "${DSPACE_REST_NAMESPACE}",
+                "DSPACE_UI_SSL": "${DSPACE_UI_SSL}",
+                "DSPACE_UI_HOST": "${DSPACE_UI_HOST}",
+                "DSPACE_UI_PORT": "${DSPACE_UI_PORT}",
+                "DSPACE_UI_NAMESPACE": "${DSPACE_UI_NAMESPACE}"
+            },
+            "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+            "error_file": "/dspace-ui-deploy/logs/error.log",
+            "out_file": "/dspace-ui-deploy/logs/out.log",
+            "merge_logs": true,
+            "max_memory_restart": "1G",
+            "autorestart": true,
+            "max_restarts": 10,
+            "min_uptime": "10s",
+            "restart_delay": 4000,
+            "kill_timeout": 5000,
+            "wait_ready": true,
+            "listen_timeout": 10000
+        }
+    ]
+}
