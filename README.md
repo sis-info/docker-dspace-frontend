@@ -233,6 +233,83 @@ docker system prune -a
 - Comprobar que el backend esté accesible desde el contenedor
 - Revisar logs del frontend: `docker-compose logs frontend-ui`
 
+## Características de Hardware
+
+### Especificaciones para Producción Pequeña
+
+Para una institución como el ICANH con 10-50 usuarios concurrentes:
+
+```yaml
+CPU: 4 cores / 4 vCPUs
+RAM: 8 GB
+Storage: 120 GB SSD
+Network: 1 Gbps
+Arquitectura: x86_64 (AMD64)
+Sistema: Ubuntu 24.04 LTS
+```
+
+### Distribución del Almacenamiento
+
+```bash
+# Distribución recomendada del disco (120 GB total)
+/                   - 20 GB   # Sistema base Ubuntu 24.04
+/var/lib/docker     - 60 GB   # Imágenes y contenedores Docker
+/var/log           - 15 GB   # Logs del sistema y aplicación
+/opt/ssl           - 5 GB    # Certificados SSL
+/opt/dspace-data   - 20 GB   # Datos de la aplicación y cache
+```
+
+### Consideraciones de Memoria
+
+```javascript
+// Distribución estimada de RAM (8 GB total)
+const memoryAllocation = {
+  nodeJs: '3 GB',      // Angular SSR + aplicación
+  nginx: '512 MB',     // Proxy reverso
+  docker: '1 GB',      // Docker daemon y overhead
+  sistema: '3.5 GB'    // Ubuntu y procesos del sistema
+};
+```
+
+### Optimizaciones del Sistema Ubuntu
+
+```bash
+# /etc/sysctl.conf - Configuraciones del kernel
+net.core.somaxconn = 65535
+net.ipv4.tcp_max_syn_backlog = 65535
+vm.max_map_count = 262144
+fs.file-max = 2097152
+
+# /etc/security/limits.conf - Límites de sistema
+* soft nofile 65535
+* hard nofile 65535
+* soft nproc 32768
+* hard nproc 32768
+```
+
+### Puertos de Red Requeridos
+
+```bash
+22/tcp   # SSH para administración
+80/tcp   # HTTP (redirección automática a HTTPS)
+443/tcp  # HTTPS (acceso principal a la aplicación)
+```
+
+### Monitoreo de Recursos
+
+```bash
+# Comandos para verificar recursos del sistema
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+free -h && cat /proc/meminfo | grep Available
+df -h && docker system df
+```
+
+**Alertas Recomendadas:**
+- CPU > 80% por más de 5 minutos
+- RAM > 85% utilizada
+- Disco > 85% lleno
+- Conexiones de red > 1000 activas
+
 ## Configuración de Producción
 
 ### Seguridad
