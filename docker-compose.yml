@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Proxy para el frontend
   frontend-proxy:
@@ -29,9 +27,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    volumes:
-      # Script de inicio como volumen para cambios sin rebuild
-      - ./dspace-ui/scripts/start-frontend.sh:/usr/local/bin/start-frontend.sh:ro
     extra_hosts:
       - "dspace-backend.local:host-gateway"  # Apunta al backend en máquina separada
     networks:

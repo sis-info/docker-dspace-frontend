@@ -91,8 +91,8 @@ nano .env
 DSPACE_NAME="Mi Organización"
 
 # URL del backend de DSpace (debe estar ejecutándose)
-DSPACE_REST_HOST=dspace-backend.local
-DSPACE_SERVER_URL=https://dspace-backend.local/server
+DSPACE_REST_HOST=dev-dspace-backend.icanh.gov.co
+DSPACE_SERVER_URL=https://dev-dspace-backend.icanh.gov.co/server
 
 # URL pública de tu frontend
 DSPACE_UI_URL=https://mi-dspace.local
@@ -122,7 +122,7 @@ Agregar entradas en `/etc/hosts` para resolución local:
 ```bash
 # Agregar estas líneas a /etc/hosts
 127.0.0.1    mi-dspace.local
-<IP-BACKEND>  dspace-backend.local
+<IP-BACKEND>  dev-dspace-backend.icanh.gov.co
 ```
 
 ## Pasos para el Despliegue
