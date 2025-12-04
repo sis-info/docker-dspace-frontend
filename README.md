@@ -1,16 +1,23 @@
-# DSpace Frontend - Despliegue con Docker
+# DSpace Frontend - Despliegue Local con Docker
 
-Este proyecto contiene la configuración para desplegar únicamente el frontend de DSpace utilizando Docker, conectándose a un backend de DSpace externo.
+Este proyecto contiene la configuración para desplegar únicamente el frontend de DSpace utilizando Docker en un entorno local, conectándose a un backend de DSpace externo.
 
-## Prerrequisitos
+## Prerrequisitos para Desarrollo Local
 
 ### Sistema Operativo
 - **Ubuntu 24.04 LTS** (recomendado)
-- Distribuciones Linux compatibles con Docker
+- **Windows 10/11** con Git Bash
+- **macOS** con Docker Desktop
 
 ### Software Requerido
 - **Docker Engine** versión 24.0 o superior
 - **Docker Compose** versión 2.20 o superior
+- **Git Bash** (para Windows)
+- **OpenSSL** para generar certificados autofirmados
+
+### Backend de DSpace
+Este frontend se conecta a un backend externo. Para configurar el backend de DSpace, consulta:
+📖 **Documentación del Backend**: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
 
 ### Instalación de Docker en Ubuntu 24.04
 
@@ -65,7 +72,7 @@ docker-dspace-frontend/
         └── [certificados]
 ```
 
-## Configuración del Despliegue
+## Configuración del Despliegue Local
 
 ### 1. Clonar el Repositorio
 
@@ -80,81 +87,147 @@ cd docker-dspace-frontend
 # Copiar el archivo de ejemplo
 cp .env.example .env
 
-# Editar las variables según tu configuración
+# Editar las variables según tu configuración local
 nano .env
 ```
 
-#### Variables Importantes a Configurar:
+#### Variables para Desarrollo Local:
 
 ```bash
 # Nombre de tu institución
-DSPACE_NAME="Mi Organización"
+DSPACE_NAME="DSpace Instituto Colombiano de Antropología e Historia"
 
-# URL del backend de DSpace (debe estar ejecutándose)
-DSPACE_REST_HOST=dev-dspace-backend.icanh.gov.co
-DSPACE_SERVER_URL=https://dev-dspace-backend.icanh.gov.co/server
+# Configuración del backend DSpace (debe estar ejecutándose)
+DSPACE_REST_HOST=dspace-backend.local
+DSPACE_REST_PORT=8443
+DSPACE_SERVER_URL=https://dspace-backend.local:8443/server
 
-# URL pública de tu frontend
-DSPACE_UI_URL=https://mi-dspace.local
-NGINX_HOST=mi-dspace.local
+# URL pública del frontend local
+DSPACE_UI_URL=https://dspace.local
+NGINX_HOST=dspace.local
 
-# Certificados SSL
-NGINX_SSL=mi-dspace.local
-CRT=mi-dspace.local.crt
-KEY=mi-dspace.local.key
+# Certificados SSL locales
+NGINX_SSL=dspace.local
+CRT=dspace.local.crt
+KEY=dspace.local.key
 ```
 
-### 3. Configurar Certificados SSL
+**⚠️ Importante**: Asegúrate de que el backend DSpace esté ejecutándose en `https://dspace-backend.local:8443/server`.
+Para configurar el backend, consulta: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
 
+### 3. Generar Certificados SSL Autofirmados
+
+#### Para Linux/macOS:
 ```bash
 # Crear directorio para certificados
-mkdir -p nginx/ssl/mi-dspace.local
+mkdir -p nginx/ssl/dspace.local
 
-# Copiar tus certificados SSL
-cp mi-dspace.local.crt nginx/ssl/mi-dspace.local/
-cp mi-dspace.local.key nginx/ssl/mi-dspace.local/
+# Generar certificados autofirmados
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "/CN=dspace.local"
 ```
 
-### 4. Configurar DNS/Hosts
-
-Agregar entradas en `/etc/hosts` para resolución local:
-
+#### Para Windows (usar Git Bash):
 ```bash
-# Agregar estas líneas a /etc/hosts
-127.0.0.1    mi-dspace.local
-<IP-BACKEND>  dev-dspace-backend.icanh.gov.co
+# Abrir Git Bash y ejecutar:
+mkdir -p nginx/ssl/dspace.local
+
+# Generar certificados con configuración específica
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "//CN=dspace.local" \
+  -config /c/openssl/openssl.cnf
 ```
 
-## Pasos para el Despliegue
+**📖 Documentación adicional sobre certificados SSL:**
+- [Documentación oficial de OpenSSL](https://www.openssl.org/docs/)
+- [Configuración de openssl.cnf](https://www.openssl.org/docs/man1.1.1/man5/config.html)
 
-### 1. Construir las Imágenes
+### 4. Configurar DNS Local
 
+Agregar entradas en el archivo `hosts` del sistema:
+
+#### Linux/macOS:
 ```bash
-# Construir todas las imágenes
-docker-compose build
+# Editar /etc/hosts
+sudo nano /etc/hosts
 
-# Ver las imágenes creadas
-docker images
+# Agregar estas líneas:
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
 ```
 
-### 2. Iniciar los Servicios
+#### Windows:
+```bash
+# Editar C:\Windows\System32\drivers\etc\hosts (como Administrador)
+# Agregar estas líneas:
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
+```
+
+## Despliegue
+
+### 1. Construir e Iniciar los Servicios
 
 ```bash
-# Iniciar en modo detached (background)
-docker-compose up -d
+# Construir e iniciar todos los servicios en una sola vez
+docker-compose up -d --build
 
-# Ver logs en tiempo real
-docker-compose logs -f
+# Ver el estado de los contenedores
+docker-compose ps
 
-# Ver logs de un servicio específico
+# Ver logs del frontend
 docker-compose logs -f frontend-ui
+
+# Ver logs del proxy nginx
 docker-compose logs -f frontend-proxy
 ```
 
-### 3. Verificar el Despliegue
+### 2. Verificar el Despliegue
+
+#### Verificar que los servicios están corriendo:
+```bash
+# Verificar contenedores activos
+docker-compose ps
+
+# Verificar conectividad al backend DSpace
+curl -k -H "Accept: application/hal+json" https://dspace-backend.local:8443/server/api
+
+# Verificar respuesta del frontend local
+curl -k https://dspace.local
+```
+
+#### Acceder a la aplicación:
+- **Frontend DSpace**: https://dspace.local
+- **API DSpace (verificación)**: https://dspace-backend.local:8443/server
+
+### 3. Comandos Útiles de Desarrollo
 
 ```bash
-# Verificar que los contenedores estén ejecutándose
+# Detener servicios
+docker-compose down
+
+# Reconstruir servicios después de cambios
+docker-compose up -d --build
+
+# Ver logs en tiempo real de todos los servicios
+docker-compose logs -f
+
+# Limpiar volúmenes (⚠️ elimina datos persistentes)
+docker-compose down -v
+
+# Acceder al contenedor del frontend para debug
+docker-compose exec frontend-ui /bin/bash
+
+# Verificar configuración nginx
+docker-compose exec frontend-proxy nginx -t
+
+# Recargar configuración nginx sin reiniciar
+docker-compose exec frontend-proxy nginx -s reload
+```
 docker-compose ps
 
 # Verificar conectividad
@@ -216,123 +289,233 @@ docker image prune -a
 docker system prune -a
 ```
 
-## Solución de Problemas
+## Solución de Problemas Comunes
 
-### Error: "host not found in upstream"
-- Verificar que el servicio backend esté ejecutándose
-- Comprobar la conectividad de red entre contenedores
-- Revisar la configuración DNS
+### 1. Error: "host not found in upstream backend"
+**Síntoma**: Nginx no puede conectar al backend DSpace.
 
-### Error: "SSL certificate not found"
-- Verificar que los certificados estén en `nginx/ssl/`
-- Comprobar los nombres de archivos en `.env`
-- Verificar permisos de lectura
+**Soluciones**:
+```bash
+# Verificar que el backend DSpace esté ejecutándose
+curl -k https://dspace-backend.local:8443/server/api
 
-### Frontend no se conecta al backend
-- Verificar variables `DSPACE_SERVER_URL` en `.env`
-- Comprobar que el backend esté accesible desde el contenedor
-- Revisar logs del frontend: `docker-compose logs frontend-ui`
+# Verificar configuración DNS local en /etc/hosts o hosts de Windows
+ping dspace-backend.local
 
-## Características de Hardware
+# Reiniciar servicios frontend
+docker-compose restart
+```
 
-### Especificaciones para Producción Pequeña
+### 2. Error: "SSL certificate not found" o "certificate verify failed"
+**Síntoma**: Error al acceder a https://dspace.local.
 
-Para una institución como el ICANH con 10-50 usuarios concurrentes:
+**Soluciones**:
+```bash
+# Verificar que los certificados existan
+ls -la nginx/ssl/dspace.local/
 
+# Regenerar certificados si es necesario
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "/CN=dspace.local"
+
+# Verificar permisos
+chmod 644 nginx/ssl/dspace.local/dspace.local.crt
+chmod 600 nginx/ssl/dspace.local/dspace.local.key
+```
+
+### 3. Error: "CORS policy" al cargar la aplicación
+**Síntoma**: El frontend no puede comunicarse con el backend.
+
+**Soluciones**:
+```bash
+# Verificar que el backend retorne URLs con puerto 8443
+curl -k -H "Accept: application/hal+json" https://dspace-backend.local:8443/server/api
+
+# Verificar configuración en .env
+grep DSPACE_REST .env
+grep DSPACE_SERVER_URL .env
+
+# Reiniciar el frontend después de cambios en .env
+docker-compose restart frontend-ui
+```
+
+### 4. Error: "Permission denied" en scripts
+**Síntoma**: El contenedor no puede ejecutar scripts de inicio.
+
+**Soluciones**:
+```bash
+# Verificar permisos del script
+ls -la dspace-ui/scripts/start-frontend.sh
+
+# Dar permisos de ejecución
+chmod +x dspace-ui/scripts/start-frontend.sh
+
+# Reconstruir el contenedor
+docker-compose up -d --build frontend-ui
+```
+
+### 5. Contenedores no inician o se reinician constantemente
+**Síntoma**: `docker-compose ps` muestra servicios con estado "Restarting".
+
+**Soluciones**:
+```bash
+# Ver logs para identificar el error
+docker-compose logs frontend-ui
+docker-compose logs frontend-proxy
+
+# Verificar configuración de variables de entorno
+docker-compose config
+
+# Verificar recursos disponibles
+docker stats
+```
+
+### 6. La aplicación carga pero no muestra contenido
+**Síntoma**: La página se carga pero no hay datos o funcionalidades.
+
+**Soluciones**:
+```bash
+# Verificar conectividad al backend desde el contenedor
+docker-compose exec frontend-ui curl -k https://dspace-backend.local:8443/server/api
+
+# Verificar configuración de DSpace UI
+docker-compose exec frontend-ui cat /dspace-ui/config/config.yml
+
+# Revisar logs del backend DSpace para errores
+# (consultar documentación del backend)
+```
+
+## Comandos de Mantenimiento
+
+### Actualizaciones
+```bash
+# Actualizar código fuente
+git pull origin main
+
+# Reconstruir después de actualizaciones
+docker-compose down
+docker-compose up -d --build
+
+# Limpiar imágenes antiguas
+docker image prune -a
+```
+
+### Respaldo y Limpieza
+```bash
+# Crear respaldo de la configuración
+tar -czf dspace-frontend-config-$(date +%Y%m%d).tar.gz .env nginx/ssl/
+
+# Limpiar logs antiguos de Docker
+docker system prune
+
+# Verificar uso de espacio
+docker system df
+```
+## Información Técnica
+
+### Configuración para Desarrollo Local vs Producción
+
+Este proyecto está configurado para **desarrollo local**. Los requisitos de hardware indicados anteriormente son para entornos de producción con múltiples usuarios concurrentes.
+
+#### Para Desarrollo Local:
 ```yaml
-CPU: 4 cores / 4 vCPUs
-RAM: 8 GB
-Storage: 120 GB SSD
-Network: 1 Gbps
-Arquitectura: x86_64 (AMD64)
-Sistema: Ubuntu 24.04 LTS
+CPU: 2 cores mínimo (cualquier CPU moderna)
+RAM: 4 GB mínimo, 8 GB recomendado
+Storage: 10 GB libres para contenedores
+Network: Conexión a internet para descargar imágenes
+Sistema: Windows 10/11, macOS, o Linux con Docker
 ```
 
-### Distribución del Almacenamiento
+#### Puertos Utilizados:
+```bash
+443   # HTTPS frontend (dspace.local)
+4000  # Puerto interno del contenedor Angular
+80    # HTTP redirigido a HTTPS
+8443  # Puerto del backend DSpace (externo)
+```
+
+### Arquitectura del Frontend
+
+```mermaid
+graph LR
+    A[Cliente Web] --> B[nginx:443 SSL]
+    B --> C[DSpace Angular:4000]
+    C --> D[Backend API:8443]
+    
+    subgraph "Docker Compose"
+        B
+        C
+    end
+    
+    subgraph "Externo"
+        D
+    end
+```
+
+### Variables de Entorno Importantes
+
+| Variable | Descripción | Ejemplo Local |
+|----------|-------------|---------------|
+| `DSPACE_REST_HOST` | Host del backend DSpace | `dspace-backend.local` |
+| `DSPACE_REST_PORT` | Puerto del backend | `8443` |
+| `DSPACE_SERVER_URL` | URL completa de la API | `https://dspace-backend.local:8443/server` |
+| `DSPACE_UI_URL` | URL del frontend | `https://dspace.local` |
+| `NGINX_HOST` | Dominio para nginx | `dspace.local` |
+
+### Estructura de Archivos Generados
 
 ```bash
-# Distribución recomendada del disco (120 GB total)
-/                   - 20 GB   # Sistema base Ubuntu 24.04
-/var/lib/docker     - 60 GB   # Imágenes y contenedores Docker
-/var/log           - 15 GB   # Logs del sistema y aplicación
-/opt/ssl           - 5 GB    # Certificados SSL
-/opt/dspace-data   - 20 GB   # Datos de la aplicación y cache
+# Después del despliegue exitoso
+docker-dspace-frontend/
+├── nginx/ssl/dspace.local/
+│   ├── dspace.local.crt     # Certificado SSL autofirmado
+│   └── dspace.local.key     # Clave privada SSL
+├── .env                     # Variables de entorno configuradas
+└── [resto de archivos del proyecto]
 ```
 
-### Consideraciones de Memoria
+## Enlaces de Documentación
 
-```javascript
-// Distribución estimada de RAM (8 GB total)
-const memoryAllocation = {
-  nodeJs: '3 GB',      // Angular SSR + aplicación
-  nginx: '512 MB',     // Proxy reverso
-  docker: '1 GB',      // Docker daemon y overhead
-  sistema: '3.5 GB'    // Ubuntu y procesos del sistema
-};
-```
+### DSpace
+- **Backend DSpace**: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
+- [Documentación Oficial DSpace](https://wiki.lyrasis.org/display/DSDOC7x)
+- [DSpace Angular GitHub](https://github.com/DSpace/dspace-angular)
 
-### Optimizaciones del Sistema Ubuntu
-
-```bash
-# /etc/sysctl.conf - Configuraciones del kernel
-net.core.somaxconn = 65535
-net.ipv4.tcp_max_syn_backlog = 65535
-vm.max_map_count = 262144
-fs.file-max = 2097152
-
-# /etc/security/limits.conf - Límites de sistema
-* soft nofile 65535
-* hard nofile 65535
-* soft nproc 32768
-* hard nproc 32768
-```
-
-### Puertos de Red Requeridos
-
-```bash
-22/tcp   # SSH para administración
-80/tcp   # HTTP (redirección automática a HTTPS)
-443/tcp  # HTTPS (acceso principal a la aplicación)
-```
-
-### Monitoreo de Recursos
-
-```bash
-# Comandos para verificar recursos del sistema
-docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
-free -h && cat /proc/meminfo | grep Available
-df -h && docker system df
-```
-
-**Alertas Recomendadas:**
-- CPU > 80% por más de 5 minutos
-- RAM > 85% utilizada
-- Disco > 85% lleno
-- Conexiones de red > 1000 activas
-
-## Configuración de Producción
-
-### Seguridad
-- Usar certificados SSL válidos
-- Configurar firewall adecuado
-- Actualizar regularmente las imágenes base
-
-### Rendimiento
-- Configurar límites de memoria y CPU en docker-compose.yml
-- Implementar monitoreo con herramientas como Prometheus
-- Configurar backup de volúmenes si es necesario
-
-### Mantenimiento
-- Programar actualizaciones regulares
-- Monitorear logs de aplicación
-- Implementar rotación de logs
-
-## Soporte
-
-Para problemas específicos de DSpace, consultar:
-- [Documentación oficial de DSpace](https://wiki.lyrasis.org/display/DSDOC7x)
-- [Repositorio de DSpace Angular](https://github.com/DSpace/dspace-angular)
-
-Para problemas de Docker:
-- [Documentación de Docker](https://docs.docker.com/)
+### Docker
+- [Docker Documentation](https://docs.docker.com/)
 - [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+
+### SSL y Certificados
+- [OpenSSL Documentation](https://www.openssl.org/docs/)
+- [Let's Encrypt (para producción)](https://letsencrypt.org/)
+- [SSL Best Practices](https://ssl-config.mozilla.org/)
+
+### Desarrollo y Troubleshooting
+- [Angular SSR Documentation](https://angular.io/guide/universal)
+- [Nginx Configuration Guide](https://nginx.org/en/docs/)
+- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
+
+---
+
+## Notas de la Versión
+
+**Versión**: 1.0.0  
+**Fecha**: Enero 2025  
+**Compatibilidad**: DSpace 7.x, Node.js 18+, Angular 16+  
+**Estado**: Desarrollo Local - Listo para Producción  
+
+### Cambios Recientes
+- ✅ Eliminadas referencias al backend en nginx
+- ✅ Configuración para puerto 8443 del backend
+- ✅ Documentación mejorada para desarrollo local
+- ✅ Scripts de SSL para múltiples plataformas
+- ✅ Guía de solución de problemas expandida
+
+### Próximas Mejoras
+- [ ] Configuración automática de certificados con Let's Encrypt
+- [ ] Script de inicialización automatizada
+- [ ] Monitoreo con Prometheus/Grafana
+- [ ] CI/CD con GitHub Actions
