@@ -28,7 +28,7 @@ services:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dspace-backend.local:host-gateway"  # Apunta al backend en máquina separada
+      - "dspace-backend.local:host-gateway"  # Apunta al backend en puerto 8443
     networks:
       - frontend-network
 
