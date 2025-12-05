@@ -1,7 +1,9 @@
 services:
   # Proxy para el frontend
   frontend-proxy:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: frontend-nginx
     ports:
       - "80:80"

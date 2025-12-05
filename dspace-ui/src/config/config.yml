@@ -1,5 +1,0 @@
-rest:
-  ssl: true
-  host: dspace-backend.local
-  port: 8443
-  nameSpace: /server
