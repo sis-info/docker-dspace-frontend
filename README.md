@@ -19,6 +19,9 @@ Este proyecto contiene la configuración para desplegar únicamente el frontend 
 Este frontend se conecta a un backend DSpace externo que debe estar ejecutándose en:
 `https://dspace-backend.local:8443/server`
 
+**📖 Configuración del Backend**: Para instalar y configurar el backend DSpace, consulta la documentación completa en:
+👉 **https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend**
+
 ## Configuración del Despliegue Local
 
 ### 1. Clonar el Repositorio
@@ -28,6 +31,7 @@ Este frontend se conecta a un backend DSpace externo que debe estar ejecutándos
 ```bash
 git clone -b local https://github.com/tu-repositorio/docker-dspace-frontend.git
 cd docker-dspace-frontend
+git checkout local
 ```
 
 ### 2. Configurar Hosts del Sistema
@@ -219,6 +223,9 @@ yarn install
 # Verificar que el backend responde
 curl -k https://dspace-backend.local:8443/server/api
 ```
+
+**📖 Si el backend no está configurado**: Consulta la documentación del backend en:
+👉 **https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend**
 
 ### Comandos de Desarrollo
 
@@ -582,7 +589,6 @@ docker-dspace-frontend/
 
 ### SSL y Certificados
 - [OpenSSL Documentation](https://www.openssl.org/docs/)
-- [Let's Encrypt (para producción)](https://letsencrypt.org/)
 - [SSL Best Practices](https://ssl-config.mozilla.org/)
 
 ### Desarrollo y Troubleshooting
