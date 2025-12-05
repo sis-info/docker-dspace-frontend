@@ -137,45 +137,192 @@ curl -k https://dspace.local
 #### Acceder a la aplicación:
 - **Frontend DSpace**: https://dspace.local
 - **API DSpace**: https://dspace-backend.local:8443/server
+
+## Desarrollo Local con Yarn (Sin Docker)
+
+Esta sección es para desarrolladores que quieren probar cambios en el frontend sin usar contenedores Docker. El frontend se ejecutará en `http://localhost:4000` conectándose al backend en `dspace-backend.local:8443`.
+
+### Prerrequisitos para Desarrollo
+
+#### Software Requerido
+- **Node.js** versión 18.x o 20.x
+- **Yarn** versión 1.22+
+- **Git** 
+- Backend DSpace ejecutándose en `dspace-backend.local:8443`
+
+#### Verificar Versiones
+```bash
+# Verificar Node.js
+node --version  # Debe ser 18.x o 20.x
+
+# Verificar o instalar Yarn
+npm install -g yarn
+yarn --version  # Debe ser 1.22+
 ```
 
-#### Acceder a la aplicación:
-- **Frontend DSpace**: https://dspace.local
-- **API DSpace (verificación)**: https://dspace-backend.local:8443/server
+### Configuración para Desarrollo
 
-### 3. Comandos Útiles de Desarrollo
+#### 1. Configurar el Archivo de Configuración
+Editar el archivo `config.yml` en `dspace-ui/src/config/`:
 
 ```bash
-# Detener servicios
-docker-compose down
+# Navegar al directorio del frontend
+cd dspace-ui/src
 
-# Reconstruir servicios después de cambios
-docker-compose up -d --build
-
-# Ver logs en tiempo real de todos los servicios
-docker-compose logs -f
-
-# Limpiar volúmenes (⚠️ elimina datos persistentes)
-docker-compose down -v
-
-# Acceder al contenedor del frontend para debug
-docker-compose exec frontend-ui /bin/bash
-
-# Verificar configuración nginx
-docker-compose exec frontend-proxy nginx -t
-
-# Recargar configuración nginx sin reiniciar
-docker-compose exec frontend-proxy nginx -s reload
-```
-docker-compose ps
-
-# Verificar conectividad
-curl -k https://mi-dspace.local
+# Editar el archivo de configuración principal de DSpace
+nano config/config.yml
 ```
 
-### 4. Acceder a la Aplicación
+**Contenido del archivo `config/config.yml` para desarrollo:**
+```yaml
+# Configuración para desarrollo local con yarn
+# Frontend: http://localhost:4000
+# Backend: dspace-backend.local:8443
 
-Abrir navegador y navegar a: `https://mi-dspace.local`
+rest:
+  ssl: true
+  host: dspace-backend.local
+  port: 8443
+  nameSpace: /server
+
+ui:
+  ssl: false
+  host: localhost
+  port: 4000
+  nameSpace: /
+
+# Configuración adicional para desarrollo
+cache:
+  # Reduce cache para desarrollo más rápido
+  serverSide:
+    botCacheTimeToLive: 60000
+    anonymousCache:
+      max: 100
+    
+# Configuración de idioma
+defaultLanguage: es
+```
+
+#### 2. Instalar Dependencias
+```bash
+# En el directorio dspace-ui/src
+yarn install
+```
+
+#### 3. Verificar Conectividad al Backend
+```bash
+# Verificar que el backend responde
+curl -k https://dspace-backend.local:8443/server/api
+```
+
+### Comandos de Desarrollo
+
+#### Modo Desarrollo (Recomendado)
+```bash
+# Navegar al directorio del código fuente
+cd dspace-ui/src
+
+# Iniciar en modo desarrollo con hot reload
+yarn start:dev
+
+# El frontend estará disponible en: http://localhost:4000
+```
+
+#### Otros Comandos Útiles
+```bash
+# Build de producción local
+yarn start:prod
+
+# Tests unitarios con watch
+yarn test
+
+# Tests unitarios sin watch
+yarn test:headless
+
+# Linting del código
+yarn lint
+
+# Corrección automática de linting
+yarn lint-fix
+
+# Tests end-to-end (requiere frontend ejecutándose)
+yarn e2e
+
+# Build para desarrollo
+yarn build
+
+# Build para producción
+yarn build:prod
+```
+
+### URLs de Desarrollo
+
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| Frontend Angular | http://localhost:4000 | Interfaz de usuario |
+| Backend API | https://dspace-backend.local:8443/server | API REST de DSpace |
+
+### Flujo de Trabajo de Desarrollo
+
+1. **Iniciar el backend** DSpace (ver documentación del backend)
+2. **Configurar** el archivo `config/config.yml` con los valores de desarrollo
+3. **Instalar** dependencias con `yarn install`
+4. **Iniciar** desarrollo con `yarn start:dev`
+5. **Desarrollar** con hot reload automático
+6. **Probar** cambios en http://localhost:4000
+
+### Diferencias entre Desarrollo y Producción
+
+| Aspecto | Desarrollo (yarn) | Producción (Docker) |
+|---------|-------------------|---------------------|
+| URL Frontend | http://localhost:4000 | https://dspace.local |
+| Configuración | `config/config.yml` | Variables de entorno |
+| SSL Frontend | No | Sí |
+| Hot Reload | Sí | No |
+| Build | Desarrollo | Producción optimizado |
+
+### Ventajas del Desarrollo con Yarn
+
+✅ **Hot Reload**: Cambios automáticos sin reiniciar  
+✅ **Debugging**: Source maps completos para depuración  
+✅ **Performance**: Compilación más rápida que Docker  
+✅ **Flexibilidad**: Fácil cambio de configuración  
+✅ **Herramientas**: Acceso completo a DevTools del navegador  
+
+### Troubleshooting Desarrollo
+
+#### Error de CORS
+```bash
+# Verificar configuración del backend
+curl -k -I https://dspace-backend.local:8443/server/api
+
+# El backend debe permitir conexiones desde localhost:4000
+```
+
+#### Error de certificados SSL
+```bash
+# El frontend usa HTTP, el backend HTTPS - esto es normal
+# Verificar que el backend esté corriendo con SSL
+curl -k https://dspace-backend.local:8443/server
+```
+
+#### Errores de compilación
+```bash
+# Limpiar caché y reinstalar
+rm -rf node_modules yarn.lock
+yarn install
+
+# Verificar versión de Node.js
+node --version  # Debe ser 18.x o 20.x
+```
+
+#### Problemas de conectividad
+```bash
+# Verificar archivo hosts
+# Windows: C:\Windows\System32\drivers\etc\hosts
+# Linux/Mac: /etc/hosts
+# Debe contener: 127.0.0.1 dspace-backend.local
+```
 
 ## Comandos Útiles
 
