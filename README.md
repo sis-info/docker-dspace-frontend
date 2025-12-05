@@ -357,14 +357,19 @@ docker-compose top
 
 ### Flujos de Reinicio Según el Tipo de Cambio
 
-#### Para cambios en código fuente (TypeScript/Angular):
+#### Para cambios en código fuente (TypeScript/Angular/HTML/SCSS):
 ```bash
-# Solo restart - el build ocurre en runtime dentro del contenedor
-docker-compose restart frontend-ui
+# RECOMENDADO: Forzar recreación del contenedor para asegurar que tome cambios
+docker-compose up -d --force-recreate frontend-ui
 
 # Monitorear el rebuild interno
 docker-compose logs -f frontend-ui
+
+# Alternativa: Solo restart (puede no detectar todos los cambios)
+docker-compose restart frontend-ui
 ```
+
+**⚠️ Nota**: Si `restart` no toma los cambios en vistas/componentes, usa `--force-recreate` que reinicia completamente el proceso de compilación interna.
 
 #### Para cambios en Dockerfile o dependencias:
 ```bash
@@ -427,6 +432,36 @@ docker-compose logs -f --tail=50
 # Ejecutar shell en contenedor
 docker-compose exec frontend-ui sh
 docker-compose exec frontend-proxy sh
+```
+
+### Troubleshooting: Cambios No Detectados
+
+#### Si los cambios en código no se reflejan:
+```bash
+# 1. Forzar recreación (RECOMENDADO)
+docker-compose up -d --force-recreate frontend-ui
+docker-compose logs -f frontend-ui
+
+# 2. Si persiste el problema, verificar procesos internos
+docker-compose exec frontend-ui ps aux
+docker-compose exec frontend-ui pm2 list
+
+# 3. Reiniciar PM2 manualmente
+docker-compose exec frontend-ui pm2 restart all
+
+# 4. Último recurso: rebuild completo
+docker-compose down
+docker-compose build --no-cache frontend-ui
+docker-compose up -d
+```
+
+#### Verificar errores de compilación:
+```bash
+# Buscar errores en logs
+docker-compose logs frontend-ui | grep -i error
+
+# Ver logs recientes
+docker-compose logs --tail=100 frontend-ui
 ```
 
 ### Limpieza
