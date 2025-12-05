@@ -14,9 +14,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    extra_hosts:
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.104"
     networks:
       - frontend-network
 
@@ -31,7 +30,7 @@ services:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dspace-backend.local:host-gateway"
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.104"
     networks:
       - frontend-network
 
