@@ -1,5 +1,5 @@
 rest:
   ssl: true
-  host: sandbox.dspace.org
-  port: 443
+  host: dspace-backend.local
+  port: 8443
   nameSpace: /server

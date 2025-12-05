@@ -23,12 +23,12 @@ services:
       dockerfile: Dockerfile
     container_name: frontend-app
     ports:
-      - "4000:4000"
+      - "5000:4000"
     env_file:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dspace-backend.local:host-gateway"  # Apunta al backend en puerto 8443
+      - "dspace-backend.local:host-gateway"
     networks:
       - frontend-network
 
