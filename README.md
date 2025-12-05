@@ -355,6 +355,63 @@ docker-compose up --build -d
 docker-compose top
 ```
 
+### Flujos de Reinicio Según el Tipo de Cambio
+
+#### Para cambios en código fuente (TypeScript/Angular):
+```bash
+# Solo restart - el build ocurre en runtime dentro del contenedor
+docker-compose restart frontend-ui
+
+# Monitorear el rebuild interno
+docker-compose logs -f frontend-ui
+```
+
+#### Para cambios en Dockerfile o dependencias:
+```bash
+# Rebuild completo del servicio
+docker-compose down
+docker-compose build --no-cache frontend-ui
+docker-compose up -d
+
+# O todo en una línea
+docker-compose up -d --build --force-recreate frontend-ui
+```
+
+#### Para cambios en docker-compose.yml o .env:
+```bash
+# Recrear servicios con nueva configuración
+docker-compose down
+docker-compose up -d --force-recreate
+
+# Solo para frontend
+docker-compose up -d --force-recreate frontend-ui
+```
+
+#### Para cambios en configuración nginx/ssl:
+```bash
+# Restart del proxy solamente
+docker-compose restart frontend-proxy
+
+# Verificar configuración nginx
+docker-compose exec frontend-proxy nginx -t
+```
+
+### Comandos de Verificación Post-Restart
+
+```bash
+# Verificar estado de servicios
+docker-compose ps
+
+# Verificar conectividad frontend
+curl -k https://dspace.local
+
+# Verificar conectividad backend
+curl -k https://dspace-backend.local:8443/server/api
+
+# Monitor logs en tiempo real
+docker-compose logs -f frontend-ui frontend-proxy
+```
+
 ### Logs y Depuración
 
 ```bash
