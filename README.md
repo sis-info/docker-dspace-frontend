@@ -163,15 +163,20 @@ yarn --version  # Debe ser 1.22+
 ### Configuración para Desarrollo
 
 #### 1. Configurar el Archivo de Configuración
-Editar el archivo `config.yml` en `dspace-ui/src/config/`:
+Copiar y editar el archivo de configuración de DSpace:
 
 ```bash
 # Navegar al directorio del frontend
 cd dspace-ui/src
 
-# Editar el archivo de configuración principal de DSpace
+# Copiar el archivo de ejemplo
+cp config/config.example.yml config/config.yml
+
+# Editar el archivo de configuración para desarrollo local
 nano config/config.yml
 ```
+
+**⚠️ Importante**: El archivo `config.yml` está en `.gitignore` y no se versiona. Cada desarrollador debe configurarlo localmente.
 
 **Contenido del archivo `config/config.yml` para desarrollo:**
 ```yaml
@@ -265,7 +270,7 @@ yarn build:prod
 ### Flujo de Trabajo de Desarrollo
 
 1. **Iniciar el backend** DSpace (ver documentación del backend)
-2. **Configurar** el archivo `config/config.yml` con los valores de desarrollo
+2. **Copiar y configurar** `config/config.example.yml` → `config/config.yml`
 3. **Instalar** dependencias con `yarn install`
 4. **Iniciar** desarrollo con `yarn start:dev`
 5. **Desarrollar** con hot reload automático
@@ -276,10 +281,11 @@ yarn build:prod
 | Aspecto | Desarrollo (yarn) | Producción (Docker) |
 |---------|-------------------|---------------------|
 | URL Frontend | http://localhost:4000 | https://dspace.local |
-| Configuración | `config/config.yml` | Variables de entorno |
+| Configuración | `config/config.yml` (local) | Variables de entorno |
 | SSL Frontend | No | Sí |
 | Hot Reload | Sí | No |
 | Build | Desarrollo | Producción optimizado |
+| Archivo Config | Copiado de `config.example.yml` | Generado automáticamente |
 
 ### Ventajas del Desarrollo con Yarn
 
