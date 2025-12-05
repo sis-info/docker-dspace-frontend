@@ -4,122 +4,71 @@ Este proyecto contiene la configuración para desplegar únicamente el frontend 
 
 ## Prerrequisitos para Desarrollo Local
 
-### Sistema Operativo
-- **Ubuntu 24.04 LTS** (recomendado)
-- **Windows 10/11** con Git Bash
-- **macOS** con Docker Desktop
+### Hardware Mínimo
+- **CPU**: 2 núcleos (2.0 GHz+)
+- **RAM**: 4 GB mínimo, 6 GB recomendado para desarrollo
+- **Almacenamiento**: 20 GB libre mínimo
+- **Red**: Conexión estable a internet
 
 ### Software Requerido
-- **Docker Engine** versión 24.0 o superior
-- **Docker Compose** versión 2.20 o superior
-- **Git Bash** (para Windows)
-- **OpenSSL** para generar certificados autofirmados
+- **Docker Desktop** versión 4.0 o superior
+- **Git** con Git Bash (Windows)
+- **OpenSSL** para generar certificados SSL
 
 ### Backend de DSpace
-Este frontend se conecta a un backend externo. Para configurar el backend de DSpace, consulta:
-📖 **Documentación del Backend**: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
-
-### Instalación de Docker en Ubuntu 24.04
-
-```bash
-# Actualizar el sistema
-sudo apt update && sudo apt upgrade -y
-
-# Instalar dependencias
-sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
-
-# Agregar la clave GPG oficial de Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-# Agregar el repositorio de Docker
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Instalar Docker
-sudo apt update
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-
-# Agregar usuario al grupo docker
-sudo usermod -aG docker $USER
-
-# Reiniciar para aplicar cambios de grupo
-newgrp docker
-```
-
-## Estructura del Proyecto
-
-```
-docker-dspace-frontend/
-├── docker-compose.yml          # Configuración principal de Docker Compose
-├── .env.example               # Plantilla de variables de entorno
-├── .env                       # Variables de entorno (no incluido en Git)
-├── .gitignore                # Archivos ignorados por Git
-├── README.md                 # Este archivo
-│
-├── dspace-ui/                # Aplicación Angular de DSpace
-│   ├── Dockerfile            # Imagen del frontend
-│   ├── dspace-ui.json        # Configuración de DSpace UI
-│   ├── scripts/              # Scripts de inicio
-│   └── src/                  # Código fuente Angular
-│       ├── angular.json
-│       ├── package.json
-│       ├── config/           # Configuraciones de DSpace
-│       └── ...
-│
-└── nginx/                    # Proxy reverso
-    ├── conf.d/
-    │   └── default.conf.template  # Configuración de Nginx
-    └── ssl/                  # Certificados SSL (no incluidos)
-        └── [certificados]
-```
+Este frontend se conecta a un backend DSpace externo que debe estar ejecutándose en:
+`https://dspace-backend.local:8443/server`
 
 ## Configuración del Despliegue Local
 
 ### 1. Clonar el Repositorio
 
+**⚠️ IMPORTANTE**: Debes clonar la rama `local` para la configuración de desarrollo local:
+
 ```bash
-git clone <url-del-repositorio>
+git clone -b local https://github.com/tu-repositorio/docker-dspace-frontend.git
 cd docker-dspace-frontend
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configurar Hosts del Sistema
 
-```bash
-# Copiar el archivo de ejemplo
-cp .env.example .env
+**CRÍTICO**: Debes agregar las siguientes entradas al archivo hosts:
 
-# Editar las variables según tu configuración local
-nano .env
+#### Windows:
+Editar `C:\Windows\System32\drivers\etc\hosts` (como Administrador) y agregar:
+```
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
 ```
 
-#### Variables para Desarrollo Local:
-
+#### Linux/macOS:
+Editar `/etc/hosts` y agregar:
 ```bash
-# Nombre de tu institución
-DSPACE_NAME="DSpace Instituto Colombiano de Antropología e Historia"
+sudo nano /etc/hosts
 
-# Configuración del backend DSpace (debe estar ejecutándose)
-DSPACE_REST_HOST=dspace-backend.local
-DSPACE_REST_PORT=8443
-DSPACE_SERVER_URL=https://dspace-backend.local:8443/server
-
-# URL pública del frontend local
-DSPACE_UI_URL=https://dspace.local
-NGINX_HOST=dspace.local
-
-# Certificados SSL locales
-NGINX_SSL=dspace.local
-CRT=dspace.local.crt
-KEY=dspace.local.key
+# Agregar estas líneas:
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
 ```
 
-**⚠️ Importante**: Asegúrate de que el backend DSpace esté ejecutándose en `https://dspace-backend.local:8443/server`.
-Para configurar el backend, consulta: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
+### 3. Generar Certificados SSL Locales
 
-### 3. Generar Certificados SSL Autofirmados
+#### Para Windows (Git Bash):
+```bash
+# Crear directorio SSL
+mkdir -p nginx/ssl/dspace.local
+
+# Generar certificados autofirmados
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "//CN=dspace.local" \
+  -config /c/openssl/openssl.cnf
+```
 
 #### Para Linux/macOS:
 ```bash
-# Crear directorio para certificados
+# Crear directorio SSL
 mkdir -p nginx/ssl/dspace.local
 
 # Generar certificados autofirmados
@@ -128,44 +77,32 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -out nginx/ssl/dspace.local/dspace.local.crt \
   -subj "/CN=dspace.local"
 ```
+### 4. Configurar Variables de Entorno
 
-#### Para Windows (usar Git Bash):
 ```bash
-# Abrir Git Bash y ejecutar:
-mkdir -p nginx/ssl/dspace.local
+# Copiar el archivo de ejemplo
+cp .env.example .env
 
-# Generar certificados con configuración específica
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout nginx/ssl/dspace.local/dspace.local.key \
-  -out nginx/ssl/dspace.local/dspace.local.crt \
-  -subj "//CN=dspace.local" \
-  -config /c/openssl/openssl.cnf
+# Editar el archivo .env con la configuración local
 ```
 
-**📖 Documentación adicional sobre certificados SSL:**
-- [Documentación oficial de OpenSSL](https://www.openssl.org/docs/)
-- [Configuración de openssl.cnf](https://www.openssl.org/docs/man1.1.1/man5/config.html)
+#### Variables de Entorno para Desarrollo Local:
 
-### 4. Configurar DNS Local
-
-Agregar entradas en el archivo `hosts` del sistema:
-
-#### Linux/macOS:
 ```bash
-# Editar /etc/hosts
-sudo nano /etc/hosts
+# Configuración del Frontend
+DSPACE_NAME="DSpace Instituto Colombiano de Antropología e Historia"
+DSPACE_UI_URL=https://dspace.local
+NGINX_HOST=dspace.local
 
-# Agregar estas líneas:
-127.0.0.1    dspace.local
-127.0.0.1    dspace-backend.local
-```
+# Configuración del Backend (debe estar ejecutándose)
+DSPACE_REST_HOST=dspace-backend.local
+DSPACE_REST_PORT=8443
+DSPACE_SERVER_URL=https://dspace-backend.local:8443/server
 
-#### Windows:
-```bash
-# Editar C:\Windows\System32\drivers\etc\hosts (como Administrador)
-# Agregar estas líneas:
-127.0.0.1    dspace.local
-127.0.0.1    dspace-backend.local
+# Certificados SSL locales
+NGINX_SSL=dspace.local
+CRT=dspace.local.crt
+KEY=dspace.local.key
 ```
 
 ## Despliegue
@@ -173,31 +110,33 @@ sudo nano /etc/hosts
 ### 1. Construir e Iniciar los Servicios
 
 ```bash
-# Construir e iniciar todos los servicios en una sola vez
+# Construir e iniciar en una sola vez
 docker-compose up -d --build
 
-# Ver el estado de los contenedores
+# Ver estado de los contenedores
 docker-compose ps
 
 # Ver logs del frontend
 docker-compose logs -f frontend-ui
-
-# Ver logs del proxy nginx
-docker-compose logs -f frontend-proxy
 ```
 
 ### 2. Verificar el Despliegue
 
-#### Verificar que los servicios están corriendo:
+#### Verificar servicios:
 ```bash
-# Verificar contenedores activos
+# Estado de contenedores
 docker-compose ps
 
-# Verificar conectividad al backend DSpace
-curl -k -H "Accept: application/hal+json" https://dspace-backend.local:8443/server/api
+# Verificar conectividad al backend
+curl -k https://dspace-backend.local:8443/server/api
 
-# Verificar respuesta del frontend local
+# Verificar frontend local
 curl -k https://dspace.local
+```
+
+#### Acceder a la aplicación:
+- **Frontend DSpace**: https://dspace.local
+- **API DSpace**: https://dspace-backend.local:8443/server
 ```
 
 #### Acceder a la aplicación:
