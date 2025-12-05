@@ -26,12 +26,13 @@ services:
       dockerfile: Dockerfile
     container_name: frontend-app
     ports:
-      - "5000:4000"
+      - "4000:4000"
     env_file:
       - .env
     restart: unless-stopped
-    extra_hosts:
-      - "dspace-backend.local:host-gateway"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - frontend-network
 
