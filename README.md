@@ -28,6 +28,7 @@ Este frontend se conecta a un backend DSpace externo que debe estar ejecutándos
 ```bash
 git clone -b local https://github.com/tu-repositorio/docker-dspace-frontend.git
 cd docker-dspace-frontend
+git checkout local
 ```
 
 ### 2. Configurar Hosts del Sistema
