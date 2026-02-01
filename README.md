@@ -720,6 +720,8 @@ Disco (SSD)	  20 GB	              40 GB	                  El directorio node_mod
 Red	          1 Gbps	              1 Gbps	                  Vital para la comunicación fluida con el backend (.104).
 
 
+
+
 hardware
 
 Componente	  Mínimo (Pruebas)	Recomendado (Producción)	Razón Técnica
