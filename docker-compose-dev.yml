@@ -16,6 +16,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    extra_hosts:
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.141"
     networks:
       - frontend-network
 
@@ -25,17 +27,18 @@ services:
       dockerfile: Dockerfile
     container_name: frontend-app
     ports:
-      - "5000:4000"
+      - "4000:4000"
     env_file:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dspace-backend.local:host-gateway"
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.141"
     networks:
       - frontend-network
 
 volumes:
   frontend-logs:
+
 
 networks:
   frontend-network:
