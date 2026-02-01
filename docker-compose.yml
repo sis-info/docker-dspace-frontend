@@ -17,7 +17,7 @@ services:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dev-dspace-backend.icanh.gov.co:192.168.0.104"
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.141"
     networks:
       - frontend-network
 
@@ -32,12 +32,13 @@ services:
       - .env
     restart: unless-stopped
     extra_hosts:
-      - "dev-dspace-backend.icanh.gov.co:192.168.0.104"
+      - "dev-dspace-backend.icanh.gov.co:192.168.0.141"
     networks:
       - frontend-network
 
 volumes:
   frontend-logs:
+
 
 networks:
   frontend-network:
