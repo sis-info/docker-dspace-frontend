@@ -35,7 +35,9 @@ services:
       - "dev-dspace-backend.icanh.gov.co:192.168.0.141"
     networks:
       - frontend-network
-
+    volumes:
+      - frontend-dist-data:/dspace-angular/dist
+      - frontend-logs:/dspace-ui-deploy/logs
 volumes:
   frontend-logs:
 
