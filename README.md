@@ -709,3 +709,21 @@ docker-dspace-frontend/
 - [ ] Script de inicialización automatizada
 - [ ] Monitoreo con Prometheus/Grafana
 - [ ] CI/CD con GitHub Actions
+
+
+hardware
+
+Componente	  Mínimo (Pruebas)	Recomendado (Producción)	Razón Técnica
+CPU (Cores)	  2 Cores	              4 Cores (Host)	          Node.js usará PM2 en modo cluster (según tu JSON). Más cores = más hilos para procesar peticiones simultáneas.  
+Memoria RAM	  4 GB	              8 GB	                  Tu config de PM2 tiene max_memory_restart: 1G. Con múltiples instancias y SSR, 8GB te dan estabilidad total.
+Disco (SSD)	  20 GB	              40 GB	                  El directorio node_modules y la carpeta dist son pesados. El almacenamiento de logs también suma.
+Red	          1 Gbps	              1 Gbps	                  Vital para la comunicación fluida con el backend (.104).
+
+
+hardware
+
+Componente	  Mínimo (Pruebas)	Recomendado (Producción)	Razón Técnica
+CPU (Cores)	  2 Cores	              4 Cores (Host)	          Node.js usará PM2 en modo cluster (según tu JSON). Más cores = más hilos para procesar peticiones simultáneas.  
+Memoria RAM	  4 GB	              8 GB	                  Tu config de PM2 tiene max_memory_restart: 1G. Con múltiples instancias y SSR, 8GB te dan estabilidad total.
+Disco (SSD)	  20 GB	              40 GB	                  El directorio node_modules y la carpeta dist son pesados. El almacenamiento de logs también suma.
+Red	          1 Gbps	              1 Gbps	                  Vital para la comunicación fluida con el backend (.104).
