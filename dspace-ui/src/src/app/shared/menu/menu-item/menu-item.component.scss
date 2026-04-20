@@ -1,5 +1,12 @@
 :host {
+  height: 100%;
   .ds-menu-item {
     display: inline-block;
+    color: #4a3c8c !important;
+
+    &:hover {
+      background-color: #4a3c8c;
+      color: white !important;
+    }
   }
 }

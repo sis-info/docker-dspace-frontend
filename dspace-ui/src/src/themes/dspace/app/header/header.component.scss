@@ -1,27 +1,70 @@
 :host {
   #main-site-header {
-    min-height: var(--ds-header-height);
+    // min-height: var(--ds-header-height);
 
     @include media-breakpoint-up(md) {
-      height: var(--ds-header-height);
+      // height: var(--ds-header-height);
     }
 
     background-color: var(--ds-header-bg);
 
     &-container {
-      min-height: var(--ds-header-height);
+      // min-height: var(--ds-header-height);
     }
-  }
 
-  img#header-logo {
-    height: var(--ds-header-logo-height);
   }
 
   button#navbar-toggler {
     color: var(--ds-header-icon-color);
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       color: var(--ds-header-icon-color-hover);
+    }
+  }
+
+  #main-site-header-container {
+    background-color: #eeeeee;
+    max-width: none !important;
+
+    #header-left {
+      padding: 0;
+      margin: auto;
+      max-width: 1200px;
+      width: 100%;
+
+      
+    }
+  }
+
+  #gov-site-header-container {
+    background-color: #3366cc;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+
+    .ast-above-header-bar.ast-above-header.site-header-focus-item {
+      margin: auto;
+      max-width: 1200px;
+      width: 100%;
+      height: auto;
+    }
+
+    figure {
+      margin: unset;
+    }
+  }
+
+  #icanh-site-header-container {
+    display: flex;
+
+    span {
+      margin: auto;
+      max-width: 1200px;
+      width: 100%;
+      padding: 1em 0;
     }
   }
 

@@ -1,11 +1,7 @@
 <ds-home-coar></ds-home-coar>
-<ds-home-news></ds-home-news>
-<ds-configuration-search-page *ngIf="showDiscoverFilters"
-                              [sideBarWidth]="3"
-                              [showViewModes]="false"
-                              [searchEnabled]="false"
-                              [inPlaceSearch]="false"
-                              [showScopeSelector]="false">
+<!-- <ds-home-news></ds-home-news> -->
+<ds-configuration-search-page *ngIf="showDiscoverFilters" [sideBarWidth]="3" [showViewModes]="false"
+  [searchEnabled]="false" [inPlaceSearch]="false" [showScopeSelector]="false">
   <ng-container searchContentTop *ngTemplateOutlet="homeContent"></ng-container>
 </ds-configuration-search-page>
 <div *ngIf="!showDiscoverFilters" class="container">
@@ -14,9 +10,20 @@
 <ds-suggestions-popup></ds-suggestions-popup>
 
 <ng-template #homeContent>
-  <ds-search-form [inPlaceSearch]="false"
-                         [searchPlaceholder]="'home.search-form.placeholder' | translate">
+  <ds-search-form [inPlaceSearch]="false" [searchPlaceholder]="'home.search-form.placeholder' | translate">
   </ds-search-form>
+  <section id="home-browser-container">
+    <h2 style="font-size: 17pt;font-weight: bold;color: #4a3c8c;">Navegar por:</h2>
+    <div>
+      <a role="menuitem" href="/browse/title"><img src="assets/icons/titulo.png"><span>Título</span></a>
+      <a role="menuitem" href="/browse/author"><img src="assets/icons/autor.png"><span>Autor</span></a>
+      <a role="menuitem" href="/browse/subject"><img src="assets/icons/materia.png"><span>Materia</span></a>
+      <a role="menuitem" href="/browse/geolocation"><img src="assets/icons/cobertura.png"><span>Cobertura geográfica</span></a>
+
+    </div>
+  </section>
+  <hr>
   <ds-top-level-community-list></ds-top-level-community-list>
+  <hr>
   <ds-recent-item-list *ngIf="recentSubmissionspageSize>0"></ds-recent-item-list>
 </ng-template>

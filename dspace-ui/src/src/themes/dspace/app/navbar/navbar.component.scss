@@ -1,3 +1,15 @@
 :host {
+    height: 100%;
 
+    #main-site-navigation {
+        .ds-menu-item {
+            color: #4a3c8c !important;
+
+            &.active,
+            &:hover {
+                background-color: #4a3c8c;
+                color: white !important;
+            }
+        }
+    }
 }

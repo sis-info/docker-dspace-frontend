@@ -3215,7 +3215,7 @@
   "home.title": "Inicio",
 
   // "home.top-level-communities.head": "Communities in DSpace",
-  "home.top-level-communities.head": "Comunidades en DSpace",
+  "home.top-level-communities.head": "Comunidades",
 
   // "home.top-level-communities.help": "Select a community to browse its collections.",
   "home.top-level-communities.help": "Seleccione una comunidad para explorar sus colecciones.",
@@ -5011,8 +5011,11 @@
   // "menu.section.browse_community_by_title": "By Title",
   "menu.section.browse_community_by_title": "Por titulo",
 
+  // "menu.section.browse_community_by_geolocation": "By geolocation",
+  "menu.section.browse_global_by_geolocation": "Por cobertura geográfica",
+
   // "menu.section.browse_global": "All of DSpace",
-  "menu.section.browse_global": "Todo DSpace",
+  "menu.section.browse_global": "Navegar por",
 
   // "menu.section.browse_global_by_author": "By Author",
   "menu.section.browse_global_by_author": "Por autor",
@@ -5183,7 +5186,7 @@
   "menu.section.registries_metadata": "Metadatos",
 
   // "menu.section.statistics": "Statistics",
-  "menu.section.statistics": "Estadísticas",
+  "menu.section.statistics": "Datos",
 
   // "menu.section.statistics_task": "Statistics Task",
   "menu.section.statistics_task": "Tarea de estadísticas",
@@ -5376,7 +5379,7 @@
   "notification.suggestion.please": "Por favor",
 
   // "nav.browse.header": "All of DSpace",
-  "nav.browse.header": "Todo DSpace",
+  "nav.browse.header": "Navegar por",
 
   // "nav.community-browse.header": "By Community",
   "nav.community-browse.header": "Por comunidad",
@@ -6655,7 +6658,7 @@
   "search.breadcrumbs": "Buscar",
 
   // "search.search-form.placeholder": "Search the repository ...",
-  "search.search-form.placeholder": "Buscar en el repositorio ...",
+  "search.search-form.placeholder": "Buscar en el repositorio",
 
   // "search.filters.remove": "Remove filter of type {{ type }} with value {{ value }}",
   "search.filters.remove": "Eliminar filtro de tipo {{ type }} con valor {{ value }}",
@@ -7086,7 +7089,7 @@
   "search.form.search_dspace": "Todo el repositorio",
 
   // "search.form.scope.all": "All of DSpace",
-  "search.form.scope.all": "Todo DSpace",
+  "search.form.scope.all": "Navegar por",
 
   // "search.results.head": "Search Results",
   "search.results.head": "Resultados de la búsqueda",

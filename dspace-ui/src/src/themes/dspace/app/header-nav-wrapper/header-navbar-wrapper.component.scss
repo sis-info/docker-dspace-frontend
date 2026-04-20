@@ -1,5 +1,5 @@
 :host {
-  --ds-header-navbar-border-bottom-style: solid var(--ds-header-navbar-border-bottom-height) var(--ds-header-navbar-border-bottom-color);
+  --ds-header-navbar-border-bottom-style: solid var(--ds-header-navbar-border-bottom-height) #4a3c8c;
   --ds-expandable-navbar-border-top-style: solid var(--ds-expandable-navbar-border-top-height) var(--ds-expandable-navbar-border-top-color);
   --ds-expandable-navbar-height: calc(100vh - var(--ds-header-height));
 
@@ -46,9 +46,9 @@
           padding: var(--ds-navbar-item-vertical-padding) var(--ds-navbar-item-horizontal-padding);
         }
         .ds-menu-item, .ds-menu-toggler-wrapper {
-          color: var(--ds-navbar-link-color) !important;
+          color: var(--ds-navbar-link-color);
           &:hover, &:focus {
-            color: var(--ds-navbar-link-color-hover) !important;
+            color: var(--ds-navbar-link-color-hover);
           }
         }
 

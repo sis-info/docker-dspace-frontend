@@ -1,13 +1,27 @@
 <ng-container *ngVar="(itemRD$ | async) as itemRD">
-  <div class="mt-4" [ngClass]="placeholderFontClass" *ngIf="itemRD?.hasSucceeded && itemRD?.payload?.page.length > 0" @fadeIn>
+  <div class="mt-4" [ngClass]="placeholderFontClass" *ngIf="itemRD?.hasSucceeded && itemRD?.payload?.page.length > 0"
+    @fadeIn>
     <div class="d-flex flex-row border-bottom mb-4 pb-4"></div>
-    <h2> {{'home.recent-submissions.head' | translate}}</h2>
-    <ul class="list-unstyled m-0 p-0">
-      <li class="my-4" *ngFor="let item of itemRD?.payload?.page">
-        <ds-listable-object-component-loader [object]="item" [viewMode]="viewMode" class="pb-4">
-        </ds-listable-object-component-loader>
-      </li>
-    </ul>
+    <div style="display:flex;">
+      <img src="assets/icons/separador1.png" alt="">
+      <h2> {{'home.recent-submissions.head' | translate}}</h2>
+    </div>
+    <div class="slider">
+      <span class="slider-button left-button"
+        (click)="itemVisible=itemVisible<=0?itemRD?.payload?.page?.length:itemVisible-1">&#10094;</span>
+      <div class="viewport">
+        <ul class="list-unstyled m-0 p-0">
+          <li class="my-4" *ngFor="let item of itemRD?.payload?.page; let i = index">
+            <ds-listable-object-component-loader [object]="item" [viewMode]="viewMode" class="pb-4"
+              [ngClass]="{'d-none':i!=itemVisible}">
+            </ds-listable-object-component-loader>
+          </li>
+        </ul>
+      </div>
+      <span class="slider-button right-button"
+        (click)="itemVisible=itemVisible>=itemRD?.payload?.page?.length-1?0:itemVisible+1">&#10095;</span>
+    </div>
+
     <button (click)="onLoadMore()" class="btn btn-primary search-button mt-4" role="link" tabindex="0">
       {{'vocabulary-treeview.load-more' | translate }} ...
     </button>

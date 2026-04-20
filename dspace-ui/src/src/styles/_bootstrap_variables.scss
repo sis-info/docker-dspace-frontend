@@ -34,19 +34,19 @@ $enable-shadows: true !default;
 /*** SEMANTIC COLOR SCHEME ***/
 
 // Override semantic colors
-$primary:   #2b4e72 !default;               // Blue gray
+$primary:   #4a3c8c !default;               // Blue gray
 $secondary: #495057 !default;               // As Bootstrap $gray-700
 $success:   #94ba65 !default;               // Lime
-$info:      #006666 !default;               // Blue green
+$info:      #4a3c8c!default;               // Blue green
 $warning:   #ec9433 !default;               // Orange
 $danger:    #cf4444 !default;               // Red
 $light:     #f8f9fa !default;               // As Bootstrap $gray-100
-$dark:      darken(#2b4e72, 17%) !default;  // Blue gray (darker)
+$dark:      darken(#4a3c8c, 17%) !default;  // Blue gray (darker)
 
 
 /*** OTHER BOOTSTRAP VARIABLES ***/
 
-$link-color: #1F7293 !default;
+$link-color: #4a3c8c !default;
 $link-hover-color: darken($link-color, 15%) !default;
 
 // The yiq lightness value that determines when the lightness of color changes from "dark" to "light". Acceptable values are between 0 and 255.
@@ -62,11 +62,12 @@ $navbar-light-toggler-icon-bg: url("data:image/svg+xml;charset=utf8,<svg+viewBox
 
 $ds-home-news-link-color: $link-color !default;
 $ds-home-news-link-hover-color: darken($ds-home-news-link-color, 15%) !default;
-$ds-breadcrumb-link-color: #003333 !default;
+$ds-breadcrumb-link-color: #4a3c8c !default;
 $ds-breadcrumb-link-active-color: #040D11 !default;
 
 $ds-header-navbar-border-top-color: #fff !default;
-$ds-header-navbar-border-bottom-color: #ced4da !default;
+$ds-header-navbar-border-bottom-color: #4a3c8c;
+
 
 $ds-header-bg: #fff !default;
 $ds-header-icon-color: $link-color !default;
@@ -79,9 +80,9 @@ $ds-navbar-link-color: $link-color !default;
 $ds-navbar-link-color-hover: #{darken($ds-navbar-link-color, 15%)} !default;
 
 $ds-slider-color: darken(#94BA65, 17%) !default;
-$ds-slider-handle-color: darken(#2B4E72, 17%) !default;
+$ds-slider-handle-color: darken(#4a3c8c, 17%) !default;
 
-$ds-admin-sidebar-bg: darken(#2b4e72, 17%) !default;
+$ds-admin-sidebar-bg: darken(#4a3c8c, 17%) !default;
 $ds-admin-sidebar-active-bg: darken($ds-admin-sidebar-bg, 3%) !default;
 $ds-admin-sidebar-fg: #47495d !default;
 $ds-admin-sidebar-fixed-element-width: 55px !default;

@@ -1,0 +1,33 @@
+:host {
+    h2 {
+        font-size: 17pt;
+        font-weight: bold;
+        color: #4a3c8c;
+        display: inline-block;
+        margin: auto 10px;
+    }
+
+    .slider {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .viewport {
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .slider-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1;
+            color: #4a3c8c;
+        }
+    }
+
+
+
+
+}
