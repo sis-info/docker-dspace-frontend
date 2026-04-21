@@ -12,6 +12,19 @@ if [ "$(id -u)" = "0" ]; then
     exec su-exec dspace /usr/local/bin/start-frontend.sh "$@"
 fi
 
+clear_dir_contents() {
+    target_dir="$1"
+    mkdir -p "$target_dir"
+
+    if awk -v p="$target_dir" '$5 == p { found=1 } END { exit found ? 0 : 1 }' /proc/self/mountinfo 2>/dev/null; then
+        echo "Detectado mountpoint en $target_dir; limpiando contenido interno..."
+    else
+        echo "Limpiando contenido de $target_dir..."
+    fi
+
+    find "$target_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+}
+
 echo "============================================"
 echo "Iniciando DSpace Angular Frontend - Independiente..."
 echo "Backend externo: ${DSPACE_REST_HOST:-dspace-backend.local}"
@@ -50,8 +63,9 @@ if [ ! -d "./dist" ] || [ "$FORCE_REBUILD" = "true" ]; then
     fi
 
     # Limpiar build anterior para asegurar integridad
-    rm -rf ./dist
-    rm -rf /dspace-ui-deploy/dist
+    # No se elimina el directorio raíz para evitar errores en mountpoints.
+    clear_dir_contents ./dist
+    clear_dir_contents /dspace-ui-deploy/dist
 
     # Ejecutar build de producción con memoria aumentada (Vital para Proxmox)
     echo "Ejecutando yarn build:prod (Esto puede tardar varios minutos)..."
@@ -68,7 +82,7 @@ if [ ! -d "./dist" ] || [ "$FORCE_REBUILD" = "true" ]; then
     
     # Copiar dist al directorio de despliegue según arquitectura DSpace
     echo "Sincronizando /dist con el directorio de despliegue..."
-    cp -r /dspace-angular/dist /dspace-ui-deploy/
+    cp -r /dspace-angular/dist/. /dspace-ui-deploy/dist/
 else
     echo "SALTANDO BUILD: Se detectó un build previo y FORCE_REBUILD=false."
     echo "El servidor iniciará inmediatamente."
