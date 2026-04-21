@@ -84,7 +84,7 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     
     # CSP más permisivo para evitar conflictos con DSpace
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: wss: ws:; frame-ancestors 'none'; object-src 'none';" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: wss: ws:; frame-ancestors 'none'; object-src 'none';" always;
     
     # Información del servidor ocultada con server_tokens off
     
