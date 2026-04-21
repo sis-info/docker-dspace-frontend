@@ -29,13 +29,24 @@ WORKDIR /dspace-ui-deploy
 # Copiar configuración de PM2 template al directorio de código fuente (se procesará en runtime)
 COPY dspace-ui.json /dspace-angular/dspace-ui.json
 
+# Copiar script de inicio antes de cambiar de usuario
+COPY scripts/start-frontend.sh /usr/local/bin/start-frontend.sh
+
+# Convertir terminaciones de línea y dar permisos de ejecución al script
+RUN tr -d '\r' < /usr/local/bin/start-frontend.sh > /tmp/start-frontend.sh && \
+    mv /tmp/start-frontend.sh /usr/local/bin/start-frontend.sh && \
+    chmod +x /usr/local/bin/start-frontend.sh
+
 # Crear usuario no-root para seguridad
 RUN addgroup -g 1001 -S dspace && \
     adduser -S -D -H -u 1001 -h /dspace-ui-deploy -s /sbin/nologin -G dspace dspace && \
     chown -R dspace:dspace /dspace-ui-deploy && \
-    chown -R dspace:dspace /dspace-angular
+    chown -R dspace:dspace /dspace-angular && \
+    chown dspace:dspace /usr/local/bin/start-frontend.sh
 
-USER dspace
+# Mantener root al inicio para poder corregir permisos de volúmenes montados;
+# el script reduce privilegios a dspace antes de ejecutar build/servidor.
+RUN apk add --no-cache su-exec
 
 # Puerto de la aplicación (según config: port 4000)
 EXPOSE 4000

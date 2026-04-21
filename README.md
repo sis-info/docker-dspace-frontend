@@ -1,169 +1,341 @@
-# DSpace Frontend - Despliegue con Docker
+# DSpace Frontend - Despliegue Local con Docker
 
-Este proyecto contiene la configuración para desplegar únicamente el frontend de DSpace utilizando Docker, conectándose a un backend de DSpace externo.
+Este proyecto contiene la configuración para desplegar únicamente el frontend de DSpace utilizando Docker en un entorno local, conectándose a un backend de DSpace externo.
 
-## Prerrequisitos
+## Prerrequisitos para Desarrollo Local
 
-### Sistema Operativo
-- **Ubuntu 24.04 LTS** (recomendado)
-- Distribuciones Linux compatibles con Docker
+### Hardware Mínimo
+- **CPU**: 2 núcleos (2.0 GHz+)
+- **RAM**: 4 GB mínimo, 6 GB recomendado para desarrollo
+- **Almacenamiento**: 20 GB libre mínimo
+- **Red**: Conexión estable a internet
 
 ### Software Requerido
-- **Docker Engine** versión 24.0 o superior
-- **Docker Compose** versión 2.20 o superior
+- **Docker Desktop** versión 4.0 o superior
+- **Git** con Git Bash (Windows)
+- **OpenSSL** para generar certificados SSL
 
-### Instalación de Docker en Ubuntu 24.04
+### Backend de DSpace
+Este frontend se conecta a un backend DSpace externo que debe estar ejecutándose en:
+`https://dspace-backend.local:8443/server`
 
-```bash
-# Actualizar el sistema
-sudo apt update && sudo apt upgrade -y
+**📖 Configuración del Backend**: Para instalar y configurar el backend DSpace, consulta la documentación completa en:
+👉 **https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend**
 
-# Instalar dependencias
-sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
-
-# Agregar la clave GPG oficial de Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-# Agregar el repositorio de Docker
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Instalar Docker
-sudo apt update
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-
-# Agregar usuario al grupo docker
-sudo usermod -aG docker $USER
-
-# Reiniciar para aplicar cambios de grupo
-newgrp docker
-```
-
-## Estructura del Proyecto
-
-```
-docker-dspace-frontend/
-├── docker-compose.yml          # Configuración principal de Docker Compose
-├── .env.example               # Plantilla de variables de entorno
-├── .env                       # Variables de entorno (no incluido en Git)
-├── .gitignore                # Archivos ignorados por Git
-├── README.md                 # Este archivo
-│
-├── dspace-ui/                # Aplicación Angular de DSpace
-│   ├── Dockerfile            # Imagen del frontend
-│   ├── dspace-ui.json        # Configuración de DSpace UI
-│   ├── scripts/              # Scripts de inicio
-│   └── src/                  # Código fuente Angular
-│       ├── angular.json
-│       ├── package.json
-│       ├── config/           # Configuraciones de DSpace
-│       └── ...
-│
-└── nginx/                    # Proxy reverso
-    ├── conf.d/
-    │   └── default.conf.template  # Configuración de Nginx
-    └── ssl/                  # Certificados SSL (no incluidos)
-        └── [certificados]
-```
-
-## Configuración del Despliegue
+## Configuración del Despliegue Local
 
 ### 1. Clonar el Repositorio
 
+**⚠️ IMPORTANTE**: Debes clonar la rama `local` para la configuración de desarrollo local:
+
 ```bash
-git clone <url-del-repositorio>
+git clone -b local https://github.com/tu-repositorio/docker-dspace-frontend.git
 cd docker-dspace-frontend
+git checkout local
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configurar Hosts del Sistema
+
+**CRÍTICO**: Debes agregar las siguientes entradas al archivo hosts:
+
+#### Windows:
+Editar `C:\Windows\System32\drivers\etc\hosts` (como Administrador) y agregar:
+```
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
+```
+
+#### Linux/macOS:
+Editar `/etc/hosts` y agregar:
+```bash
+sudo nano /etc/hosts
+
+# Agregar estas líneas:
+127.0.0.1    dspace.local
+127.0.0.1    dspace-backend.local
+```
+
+### 3. Generar Certificados SSL Locales
+
+#### Para Windows (Git Bash):
+```bash
+# Crear directorio SSL
+mkdir -p nginx/ssl/dspace.local
+
+# Generar certificados autofirmados
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "//CN=dspace.local" \
+  -config /c/openssl/openssl.cnf
+```
+
+#### Para Linux/macOS:
+```bash
+# Crear directorio SSL
+mkdir -p nginx/ssl/dspace.local
+
+# Generar certificados autofirmados
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "/CN=dspace.local"
+```
+### 4. Configurar Variables de Entorno
 
 ```bash
 # Copiar el archivo de ejemplo
 cp .env.example .env
 
-# Editar las variables según tu configuración
-nano .env
+# Editar el archivo .env con la configuración local
 ```
 
-#### Variables Importantes a Configurar:
+#### Variables de Entorno para Desarrollo Local:
 
 ```bash
-# Nombre de tu institución
-DSPACE_NAME="Mi Organización"
+# Configuración del Frontend
+DSPACE_NAME="DSpace Instituto Colombiano de Antropología e Historia"
+DSPACE_UI_URL=https://dspace.local
+NGINX_HOST=dspace.local
 
-# URL del backend de DSpace (debe estar ejecutándose)
+# Configuración del Backend (debe estar ejecutándose)
 DSPACE_REST_HOST=dspace-backend.local
-DSPACE_SERVER_URL=https://dspace-backend.local/server
+DSPACE_REST_PORT=8443
+DSPACE_SERVER_URL=https://dspace-backend.local:8443/server
 
-# URL pública de tu frontend
-DSPACE_UI_URL=https://mi-dspace.local
-NGINX_HOST=mi-dspace.local
-
-# Certificados SSL
-NGINX_SSL=mi-dspace.local
-CRT=mi-dspace.local.crt
-KEY=mi-dspace.local.key
+# Certificados SSL locales
+NGINX_SSL=dspace.local
+CRT=dspace.local.crt
+KEY=dspace.local.key
 ```
 
-### 3. Configurar Certificados SSL
+## Despliegue
+
+### 1. Construir e Iniciar los Servicios
 
 ```bash
-# Crear directorio para certificados
-mkdir -p nginx/ssl/mi-dspace.local
+# Construir e iniciar en una sola vez
+docker-compose up -d --build
 
-# Copiar tus certificados SSL
-cp mi-dspace.local.crt nginx/ssl/mi-dspace.local/
-cp mi-dspace.local.key nginx/ssl/mi-dspace.local/
-```
-
-### 4. Configurar DNS/Hosts
-
-Agregar entradas en `/etc/hosts` para resolución local:
-
-```bash
-# Agregar estas líneas a /etc/hosts
-127.0.0.1    mi-dspace.local
-<IP-BACKEND>  dspace-backend.local
-```
-
-## Pasos para el Despliegue
-
-### 1. Construir las Imágenes
-
-```bash
-# Construir todas las imágenes
-docker-compose build
-
-# Ver las imágenes creadas
-docker images
-```
-
-### 2. Iniciar los Servicios
-
-```bash
-# Iniciar en modo detached (background)
-docker-compose up -d
-
-# Ver logs en tiempo real
-docker-compose logs -f
-
-# Ver logs de un servicio específico
-docker-compose logs -f frontend-ui
-docker-compose logs -f frontend-proxy
-```
-
-### 3. Verificar el Despliegue
-
-```bash
-# Verificar que los contenedores estén ejecutándose
+# Ver estado de los contenedores
 docker-compose ps
 
-# Verificar conectividad
-curl -k https://mi-dspace.local
+# Ver logs del frontend
+docker-compose logs -f frontend-ui
 ```
 
-### 4. Acceder a la Aplicación
+### 2. Verificar el Despliegue
 
-Abrir navegador y navegar a: `https://mi-dspace.local`
+#### Verificar servicios:
+```bash
+# Estado de contenedores
+docker-compose ps
+
+# Verificar conectividad al backend
+curl -k https://dspace-backend.local:8443/server/api
+
+# Verificar frontend local
+curl -k https://dspace.local
+```
+
+#### Acceder a la aplicación:
+- **Frontend DSpace**: https://dspace.local
+- **API DSpace**: https://dspace-backend.local:8443/server
+
+## Desarrollo Local con Yarn (Sin Docker)
+
+Esta sección es para desarrolladores que quieren probar cambios en el frontend sin usar contenedores Docker. El frontend se ejecutará en `http://localhost:4000` conectándose al backend en `dspace-backend.local:8443`.
+
+### Prerrequisitos para Desarrollo
+
+#### Software Requerido
+- **Node.js** versión 18.x o 20.x
+- **Yarn** versión 1.22+
+- **Git** 
+- Backend DSpace ejecutándose en `dspace-backend.local:8443`
+
+#### Verificar Versiones
+```bash
+# Verificar Node.js
+node --version  # Debe ser 18.x o 20.x
+
+# Verificar o instalar Yarn
+npm install -g yarn
+yarn --version  # Debe ser 1.22+
+```
+
+### Configuración para Desarrollo
+
+#### 1. Configurar el Archivo de Configuración
+Copiar y editar el archivo de configuración de DSpace:
+
+```bash
+# Navegar al directorio del frontend
+cd dspace-ui/src
+
+# Copiar el archivo de ejemplo
+cp config/config.example.yml config/config.yml
+
+# Editar el archivo de configuración para desarrollo local
+nano config/config.yml
+```
+
+**⚠️ Importante**: El archivo `config.yml` está en `.gitignore` y no se versiona. Cada desarrollador debe configurarlo localmente.
+
+**Contenido del archivo `config/config.yml` para desarrollo:**
+```yaml
+# Configuración para desarrollo local con yarn
+# Frontend: http://localhost:4000
+# Backend: dspace-backend.local:8443
+
+rest:
+  ssl: true
+  host: dspace-backend.local
+  port: 8443
+  nameSpace: /server
+
+ui:
+  ssl: false
+  host: localhost
+  port: 4000
+  nameSpace: /
+
+# Configuración adicional para desarrollo
+cache:
+  # Reduce cache para desarrollo más rápido
+  serverSide:
+    botCacheTimeToLive: 60000
+    anonymousCache:
+      max: 100
+    
+# Configuración de idioma
+defaultLanguage: es
+```
+
+#### 2. Instalar Dependencias
+```bash
+# En el directorio dspace-ui/src
+yarn install
+```
+
+#### 3. Verificar Conectividad al Backend
+```bash
+# Verificar que el backend responde
+curl -k https://dspace-backend.local:8443/server/api
+```
+
+**📖 Si el backend no está configurado**: Consulta la documentación del backend en:
+👉 **https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend**
+
+### Comandos de Desarrollo
+
+#### Modo Desarrollo (Recomendado)
+```bash
+# Navegar al directorio del código fuente
+cd dspace-ui/src
+
+# Iniciar en modo desarrollo con hot reload
+yarn start:dev
+
+# El frontend estará disponible en: http://localhost:4000
+```
+
+#### Otros Comandos Útiles
+```bash
+# Build de producción local
+yarn start:prod
+
+# Tests unitarios con watch
+yarn test
+
+# Tests unitarios sin watch
+yarn test:headless
+
+# Linting del código
+yarn lint
+
+# Corrección automática de linting
+yarn lint-fix
+
+# Tests end-to-end (requiere frontend ejecutándose)
+yarn e2e
+
+# Build para desarrollo
+yarn build
+
+# Build para producción
+yarn build:prod
+```
+
+### URLs de Desarrollo
+
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| Frontend Angular | http://localhost:4000 | Interfaz de usuario |
+| Backend API | https://dspace-backend.local:8443/server | API REST de DSpace |
+
+### Flujo de Trabajo de Desarrollo
+
+1. **Iniciar el backend** DSpace (ver documentación del backend)
+2. **Copiar y configurar** `config/config.example.yml` → `config/config.yml`
+3. **Instalar** dependencias con `yarn install`
+4. **Iniciar** desarrollo con `yarn start:dev`
+5. **Desarrollar** con hot reload automático
+6. **Probar** cambios en http://localhost:4000
+
+### Diferencias entre Desarrollo y Producción
+
+| Aspecto | Desarrollo (yarn) | Producción (Docker) |
+|---------|-------------------|---------------------|
+| URL Frontend | http://localhost:4000 | https://dspace.local |
+| Configuración | `config/config.yml` (local) | Variables de entorno |
+| SSL Frontend | No | Sí |
+| Hot Reload | Sí | No |
+| Build | Desarrollo | Producción optimizado |
+| Archivo Config | Copiado de `config.example.yml` | Generado automáticamente |
+
+### Ventajas del Desarrollo con Yarn
+
+✅ **Hot Reload**: Cambios automáticos sin reiniciar  
+✅ **Debugging**: Source maps completos para depuración  
+✅ **Performance**: Compilación más rápida que Docker  
+✅ **Flexibilidad**: Fácil cambio de configuración  
+✅ **Herramientas**: Acceso completo a DevTools del navegador  
+
+### Troubleshooting Desarrollo
+
+#### Error de CORS
+```bash
+# Verificar configuración del backend
+curl -k -I https://dspace-backend.local:8443/server/api
+
+# El backend debe permitir conexiones desde localhost:4000
+```
+
+#### Error de certificados SSL
+```bash
+# El frontend usa HTTP, el backend HTTPS - esto es normal
+# Verificar que el backend esté corriendo con SSL
+curl -k https://dspace-backend.local:8443/server
+```
+
+#### Errores de compilación
+```bash
+# Limpiar caché y reinstalar
+rm -rf node_modules yarn.lock
+yarn install
+
+# Verificar versión de Node.js
+node --version  # Debe ser 18.x o 20.x
+```
+
+#### Problemas de conectividad
+```bash
+# Verificar archivo hosts
+# Windows: C:\Windows\System32\drivers\etc\hosts
+# Linux/Mac: /etc/hosts
+# Debe contener: 127.0.0.1 dspace-backend.local
+```
 
 ## Comandos Útiles
 
@@ -183,6 +355,68 @@ docker-compose up --build -d
 docker-compose top
 ```
 
+### Flujos de Reinicio Según el Tipo de Cambio
+
+#### Para cambios en código fuente (TypeScript/Angular/HTML/SCSS):
+```bash
+# RECOMENDADO: Forzar recreación del contenedor para asegurar que tome cambios
+docker-compose up -d --force-recreate frontend-ui
+
+# Monitorear el rebuild interno
+docker-compose logs -f frontend-ui
+
+# Alternativa: Solo restart (puede no detectar todos los cambios)
+docker-compose restart frontend-ui
+```
+
+**⚠️ Nota**: Si `restart` no toma los cambios en vistas/componentes, usa `--force-recreate` que reinicia completamente el proceso de compilación interna.
+
+#### Para cambios en Dockerfile o dependencias:
+```bash
+# Rebuild completo del servicio
+docker-compose down
+docker-compose build --no-cache frontend-ui
+docker-compose up -d
+
+# O todo en una línea
+docker-compose up -d --build --force-recreate frontend-ui
+```
+
+#### Para cambios en docker-compose.yml o .env:
+```bash
+# Recrear servicios con nueva configuración
+docker-compose down
+docker-compose up -d --force-recreate
+
+# Solo para frontend
+docker-compose up -d --force-recreate frontend-ui
+```
+
+#### Para cambios en configuración nginx/ssl:
+```bash
+# Restart del proxy solamente
+docker-compose restart frontend-proxy
+
+# Verificar configuración nginx
+docker-compose exec frontend-proxy nginx -t
+```
+
+### Comandos de Verificación Post-Restart
+
+```bash
+# Verificar estado de servicios
+docker-compose ps
+
+# Verificar conectividad frontend
+curl -k https://dspace.local
+
+# Verificar conectividad backend
+curl -k https://dspace-backend.local:8443/server/api
+
+# Monitor logs en tiempo real
+docker-compose logs -f frontend-ui frontend-proxy
+```
+
 ### Logs y Depuración
 
 ```bash
@@ -198,6 +432,36 @@ docker-compose logs -f --tail=50
 # Ejecutar shell en contenedor
 docker-compose exec frontend-ui sh
 docker-compose exec frontend-proxy sh
+```
+
+### Troubleshooting: Cambios No Detectados
+
+#### Si los cambios en código no se reflejan:
+```bash
+# 1. Forzar recreación (RECOMENDADO)
+docker-compose up -d --force-recreate frontend-ui
+docker-compose logs -f frontend-ui
+
+# 2. Si persiste el problema, verificar procesos internos
+docker-compose exec frontend-ui ps aux
+docker-compose exec frontend-ui pm2 list
+
+# 3. Reiniciar PM2 manualmente
+docker-compose exec frontend-ui pm2 restart all
+
+# 4. Último recurso: rebuild completo
+docker-compose down
+docker-compose build --no-cache frontend-ui
+docker-compose up -d
+```
+
+#### Verificar errores de compilación:
+```bash
+# Buscar errores en logs
+docker-compose logs frontend-ui | grep -i error
+
+# Ver logs recientes
+docker-compose logs --tail=100 frontend-ui
 ```
 
 ### Limpieza
@@ -216,123 +480,250 @@ docker image prune -a
 docker system prune -a
 ```
 
-## Solución de Problemas
+## Solución de Problemas Comunes
 
-### Error: "host not found in upstream"
-- Verificar que el servicio backend esté ejecutándose
-- Comprobar la conectividad de red entre contenedores
-- Revisar la configuración DNS
+### 1. Error: "host not found in upstream backend"
+**Síntoma**: Nginx no puede conectar al backend DSpace.
 
-### Error: "SSL certificate not found"
-- Verificar que los certificados estén en `nginx/ssl/`
-- Comprobar los nombres de archivos en `.env`
-- Verificar permisos de lectura
+**Soluciones**:
+```bash
+# Verificar que el backend DSpace esté ejecutándose
+curl -k https://dspace-backend.local:8443/server/api
 
-### Frontend no se conecta al backend
-- Verificar variables `DSPACE_SERVER_URL` en `.env`
-- Comprobar que el backend esté accesible desde el contenedor
-- Revisar logs del frontend: `docker-compose logs frontend-ui`
+# Verificar configuración DNS local en /etc/hosts o hosts de Windows
+ping dspace-backend.local
 
-## Características de Hardware
+# Reiniciar servicios frontend
+docker-compose restart
+```
 
-### Especificaciones para Producción Pequeña
+### 2. Error: "SSL certificate not found" o "certificate verify failed"
+**Síntoma**: Error al acceder a https://dspace.local.
 
-Para una institución como el ICANH con 10-50 usuarios concurrentes:
+**Soluciones**:
+```bash
+# Verificar que los certificados existan
+ls -la nginx/ssl/dspace.local/
 
+# Regenerar certificados si es necesario
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/dspace.local/dspace.local.key \
+  -out nginx/ssl/dspace.local/dspace.local.crt \
+  -subj "/CN=dspace.local"
+
+# Verificar permisos
+chmod 644 nginx/ssl/dspace.local/dspace.local.crt
+chmod 600 nginx/ssl/dspace.local/dspace.local.key
+```
+
+### 3. Error: "CORS policy" al cargar la aplicación
+**Síntoma**: El frontend no puede comunicarse con el backend.
+
+**Soluciones**:
+```bash
+# Verificar que el backend retorne URLs con puerto 8443
+curl -k -H "Accept: application/hal+json" https://dspace-backend.local:8443/server/api
+
+# Verificar configuración en .env
+grep DSPACE_REST .env
+grep DSPACE_SERVER_URL .env
+
+# Reiniciar el frontend después de cambios en .env
+docker-compose restart frontend-ui
+```
+
+### 4. Error: "Permission denied" en scripts
+**Síntoma**: El contenedor no puede ejecutar scripts de inicio.
+
+**Soluciones**:
+```bash
+# Verificar permisos del script
+ls -la dspace-ui/scripts/start-frontend.sh
+
+# Dar permisos de ejecución
+chmod +x dspace-ui/scripts/start-frontend.sh
+
+# Reconstruir el contenedor
+docker-compose up -d --build frontend-ui
+```
+
+### 5. Contenedores no inician o se reinician constantemente
+**Síntoma**: `docker-compose ps` muestra servicios con estado "Restarting".
+
+**Soluciones**:
+```bash
+# Ver logs para identificar el error
+docker-compose logs frontend-ui
+docker-compose logs frontend-proxy
+
+# Verificar configuración de variables de entorno
+docker-compose config
+
+# Verificar recursos disponibles
+docker stats
+```
+
+### 6. La aplicación carga pero no muestra contenido
+**Síntoma**: La página se carga pero no hay datos o funcionalidades.
+
+**Soluciones**:
+```bash
+# Verificar conectividad al backend desde el contenedor
+docker-compose exec frontend-ui curl -k https://dspace-backend.local:8443/server/api
+
+# Verificar configuración de DSpace UI
+docker-compose exec frontend-ui cat /dspace-ui/config/config.yml
+
+# Revisar logs del backend DSpace para errores
+# (consultar documentación del backend)
+```
+
+## Comandos de Mantenimiento
+
+### Actualizaciones
+```bash
+# Actualizar código fuente
+git pull origin main
+
+# Reconstruir después de actualizaciones
+docker-compose down
+docker-compose up -d --build
+
+# Limpiar imágenes antiguas
+docker image prune -a
+```
+
+### Respaldo y Limpieza
+```bash
+# Crear respaldo de la configuración
+tar -czf dspace-frontend-config-$(date +%Y%m%d).tar.gz .env nginx/ssl/
+
+# Limpiar logs antiguos de Docker
+docker system prune
+
+# Verificar uso de espacio
+docker system df
+```
+## Información Técnica
+
+### Configuración para Desarrollo Local vs Producción
+
+Este proyecto está configurado para **desarrollo local**. Los requisitos de hardware indicados anteriormente son para entornos de producción con múltiples usuarios concurrentes.
+
+#### Para Desarrollo Local:
 ```yaml
-CPU: 4 cores / 4 vCPUs
-RAM: 8 GB
-Storage: 120 GB SSD
-Network: 1 Gbps
-Arquitectura: x86_64 (AMD64)
-Sistema: Ubuntu 24.04 LTS
+CPU: 2 cores mínimo (cualquier CPU moderna)
+RAM: 4 GB mínimo, 8 GB recomendado
+Storage: 10 GB libres para contenedores
+Network: Conexión a internet para descargar imágenes
+Sistema: Windows 10/11, macOS, o Linux con Docker
 ```
 
-### Distribución del Almacenamiento
+#### Puertos Utilizados:
+```bash
+443   # HTTPS frontend (dspace.local)
+4000  # Puerto interno del contenedor Angular
+80    # HTTP redirigido a HTTPS
+8443  # Puerto del backend DSpace (externo)
+```
+
+### Arquitectura del Frontend
+
+```mermaid
+graph LR
+    A[Cliente Web] --> B[nginx:443 SSL]
+    B --> C[DSpace Angular:4000]
+    C --> D[Backend API:8443]
+    
+    subgraph "Docker Compose"
+        B
+        C
+    end
+    
+    subgraph "Externo"
+        D
+    end
+```
+
+### Variables de Entorno Importantes
+
+| Variable | Descripción | Ejemplo Local |
+|----------|-------------|---------------|
+| `DSPACE_REST_HOST` | Host del backend DSpace | `dspace-backend.local` |
+| `DSPACE_REST_PORT` | Puerto del backend | `8443` |
+| `DSPACE_SERVER_URL` | URL completa de la API | `https://dspace-backend.local:8443/server` |
+| `DSPACE_UI_URL` | URL del frontend | `https://dspace.local` |
+| `NGINX_HOST` | Dominio para nginx | `dspace.local` |
+
+### Estructura de Archivos Generados
 
 ```bash
-# Distribución recomendada del disco (120 GB total)
-/                   - 20 GB   # Sistema base Ubuntu 24.04
-/var/lib/docker     - 60 GB   # Imágenes y contenedores Docker
-/var/log           - 15 GB   # Logs del sistema y aplicación
-/opt/ssl           - 5 GB    # Certificados SSL
-/opt/dspace-data   - 20 GB   # Datos de la aplicación y cache
+# Después del despliegue exitoso
+docker-dspace-frontend/
+├── nginx/ssl/dspace.local/
+│   ├── dspace.local.crt     # Certificado SSL autofirmado
+│   └── dspace.local.key     # Clave privada SSL
+├── .env                     # Variables de entorno configuradas
+└── [resto de archivos del proyecto]
 ```
 
-### Consideraciones de Memoria
+## Enlaces de Documentación
 
-```javascript
-// Distribución estimada de RAM (8 GB total)
-const memoryAllocation = {
-  nodeJs: '3 GB',      // Angular SSR + aplicación
-  nginx: '512 MB',     // Proxy reverso
-  docker: '1 GB',      // Docker daemon y overhead
-  sistema: '3.5 GB'    // Ubuntu y procesos del sistema
-};
-```
+### DSpace
+- **Backend DSpace**: https://versionamiento.icanh.gov.co/icanh/docker-dspace-backend
+- [Documentación Oficial DSpace](https://wiki.lyrasis.org/display/DSDOC7x)
+- [DSpace Angular GitHub](https://github.com/DSpace/dspace-angular)
 
-### Optimizaciones del Sistema Ubuntu
-
-```bash
-# /etc/sysctl.conf - Configuraciones del kernel
-net.core.somaxconn = 65535
-net.ipv4.tcp_max_syn_backlog = 65535
-vm.max_map_count = 262144
-fs.file-max = 2097152
-
-# /etc/security/limits.conf - Límites de sistema
-* soft nofile 65535
-* hard nofile 65535
-* soft nproc 32768
-* hard nproc 32768
-```
-
-### Puertos de Red Requeridos
-
-```bash
-22/tcp   # SSH para administración
-80/tcp   # HTTP (redirección automática a HTTPS)
-443/tcp  # HTTPS (acceso principal a la aplicación)
-```
-
-### Monitoreo de Recursos
-
-```bash
-# Comandos para verificar recursos del sistema
-docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
-free -h && cat /proc/meminfo | grep Available
-df -h && docker system df
-```
-
-**Alertas Recomendadas:**
-- CPU > 80% por más de 5 minutos
-- RAM > 85% utilizada
-- Disco > 85% lleno
-- Conexiones de red > 1000 activas
-
-## Configuración de Producción
-
-### Seguridad
-- Usar certificados SSL válidos
-- Configurar firewall adecuado
-- Actualizar regularmente las imágenes base
-
-### Rendimiento
-- Configurar límites de memoria y CPU en docker-compose.yml
-- Implementar monitoreo con herramientas como Prometheus
-- Configurar backup de volúmenes si es necesario
-
-### Mantenimiento
-- Programar actualizaciones regulares
-- Monitorear logs de aplicación
-- Implementar rotación de logs
-
-## Soporte
-
-Para problemas específicos de DSpace, consultar:
-- [Documentación oficial de DSpace](https://wiki.lyrasis.org/display/DSDOC7x)
-- [Repositorio de DSpace Angular](https://github.com/DSpace/dspace-angular)
-
-Para problemas de Docker:
-- [Documentación de Docker](https://docs.docker.com/)
+### Docker
+- [Docker Documentation](https://docs.docker.com/)
 - [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+
+### SSL y Certificados
+- [OpenSSL Documentation](https://www.openssl.org/docs/)
+- [SSL Best Practices](https://ssl-config.mozilla.org/)
+
+### Desarrollo y Troubleshooting
+- [Angular SSR Documentation](https://angular.io/guide/universal)
+- [Nginx Configuration Guide](https://nginx.org/en/docs/)
+- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
+
+---
+
+## Notas de la Versión
+
+**Versión**: 1.0.0  
+**Fecha**: Enero 2025  
+**Compatibilidad**: DSpace 7.x, Node.js 18+, Angular 16+  
+**Estado**: Desarrollo Local - Listo para Producción  
+
+### Cambios Recientes
+- ✅ Eliminadas referencias al backend en nginx
+- ✅ Configuración para puerto 8443 del backend
+- ✅ Documentación mejorada para desarrollo local
+- ✅ Scripts de SSL para múltiples plataformas
+- ✅ Guía de solución de problemas expandida
+
+### Próximas Mejoras
+- [ ] Configuración automática de certificados con Let's Encrypt
+- [ ] Script de inicialización automatizada
+- [ ] Monitoreo con Prometheus/Grafana
+- [ ] CI/CD con GitHub Actions
+
+
+hardware
+
+Componente	  Mínimo (Pruebas)	Recomendado (Producción)	Razón Técnica
+CPU (Cores)	  2 Cores	              4 Cores (Host)	          Node.js usará PM2 en modo cluster (según tu JSON). Más cores = más hilos para procesar peticiones simultáneas.  
+Memoria RAM	  4 GB	              8 GB	                  Tu config de PM2 tiene max_memory_restart: 1G. Con múltiples instancias y SSR, 8GB te dan estabilidad total.
+Disco (SSD)	  20 GB	              40 GB	                  El directorio node_modules y la carpeta dist son pesados. El almacenamiento de logs también suma.
+Red	          1 Gbps	              1 Gbps	                  Vital para la comunicación fluida con el backend (.104).
+
+
+hardware
+
+Componente	  Mínimo (Pruebas)	Recomendado (Producción)	Razón Técnica
+CPU (Cores)	  2 Cores	              4 Cores (Host)	          Node.js usará PM2 en modo cluster (según tu JSON). Más cores = más hilos para procesar peticiones simultáneas.  
+Memoria RAM	  4 GB	              8 GB	                  Tu config de PM2 tiene max_memory_restart: 1G. Con múltiples instancias y SSR, 8GB te dan estabilidad total.
+Disco (SSD)	  20 GB	              40 GB	                  El directorio node_modules y la carpeta dist son pesados. El almacenamiento de logs también suma.
+Red	          1 Gbps	              1 Gbps	                  Vital para la comunicación fluida con el backend (.104).

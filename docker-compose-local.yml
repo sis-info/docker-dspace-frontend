@@ -1,0 +1,48 @@
+services:
+  # Proxy para el frontend
+  frontend-proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: frontend-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/templates
+      - ./nginx/ssl:/etc/nginx/ssl/${NGINX_SSL}/
+    depends_on:
+      - frontend-ui
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - frontend-network
+
+  frontend-ui:
+    build:
+      context: ./dspace-ui
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "5000:4000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    extra_hosts:
+      - "dspace-backend.local:host-gateway"
+    networks:
+      - frontend-network
+    volumes:
+      - frontend-dist-data:/dspace-ui-deploy/dist
+      - frontend-logs:/dspace-ui-deploy/logs
+
+volumes:
+  frontend-logs:
+  frontend-dist-data:
+
+
+networks:
+  frontend-network:
+    driver: bridge
+    name: dspace-frontend-only
