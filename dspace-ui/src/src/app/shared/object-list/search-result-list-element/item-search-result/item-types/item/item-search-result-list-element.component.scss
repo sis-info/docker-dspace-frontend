@@ -5,3 +5,11 @@
         cursor: pointer;
     }
 }
+
+.lead.item-list-title.dont-break-out {
+  color: #4a3c8c;
+
+  &:hover, &:focus {
+    color: darken(#4a3c8c, 15%);
+  }
+}

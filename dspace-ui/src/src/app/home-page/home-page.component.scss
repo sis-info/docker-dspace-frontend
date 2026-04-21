@@ -1,6 +1,46 @@
 @include media-breakpoint-down(md) {
-  ds-themed-configuration-search-page + .container {
+  ds-themed-configuration-search-page+.container {
     width: 100%;
     max-width: none;
   }
+}
+
+:host {
+
+  hr {
+    border: 0;
+    border-top: 3px solid #4a3c8c;
+  }
+
+  #home-browser-container {
+
+    >div {
+      display: flex;
+
+      >a {
+        border: 2px solid #4a3c8c;
+        margin: auto;
+        padding: 8px;
+        border-radius: 25px;
+        display: flex;
+
+        >span {
+          width: 150px;
+          display: inline-block;
+          margin: auto 0 auto 0;
+          font-size: 17pt;
+          font-weight: bold;
+          color: #4a3c8c;
+          line-height: 1;
+        }
+
+        >img {
+          display: inline;
+          height: 51px;
+          margin: auto 0 auto 0;
+        }
+      }
+    }
+  }
+
 }

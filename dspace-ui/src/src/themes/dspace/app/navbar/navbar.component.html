@@ -1,7 +1,13 @@
 <ng-container *ngIf="(isMobile$ | async) && (isAuthenticated$ | async)">
   <ds-user-menu [inExpandableNavbar]="true"></ds-user-menu>
 </ng-container>
-<div class="navbar-nav flex-shrink-1 h-100 align-items-md-stretch gapx-3" role="menubar" id="main-site-navigation" [ngClass]="(isMobile$ | async) ? 'navbar-nav-mobile' : 'navbar-nav-desktop'">
+<div class="navbar-nav flex-shrink-1 h-100 align-items-md-stretch gapx-3" role="menubar" id="main-site-navigation"
+  [ngClass]="(isMobile$ | async) ? 'navbar-nav-mobile' : 'navbar-nav-desktop'">
+
+  <a class="ds-menu-item" role="menuitem" [routerLink]="['/home']" routerLinkActive="active" tabindex="0">Inicio</a>
+  <a class="ds-menu-item" role="menuitem" [routerLink]="['search']" routerLinkActive="active" tabindex="0">Nuestro Repositorio</a>
+
+
   <ng-container *ngFor="let section of (sections | async)">
     <ng-container
       *ngComponentOutlet="(sectionMap$ | async).get(section.id)?.component; injector: (sectionMap$ | async).get(section.id)?.injector;"></ng-container>

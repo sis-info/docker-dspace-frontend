@@ -68,6 +68,8 @@ export class RecentItemListComponent implements OnInit, OnDestroy {
   paginationConfig: PaginationComponentOptions;
   sortConfig: SortOptions;
 
+  itemVisible: number = 0;
+
   /**
  * The view-mode we're currently on
  * @type {ViewMode}

@@ -7,3 +7,37 @@
 .scope-button {
   max-width: var(--ds-search-form-scope-max-width);
 }
+
+:host {
+  .form-group.input-group {
+    padding: 10px;
+    border: 2px solid #4a3c8c;
+    border-radius: 15px;
+  }
+
+  .form-control {
+    border: none;
+    border-right: 2px solid #4a3c8c;
+    box-shadow: none;
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: #4a3c8c;
+      font-size: 17pt;
+    }
+  }
+
+  .search-button {
+    background-color: white;
+    border: none;
+    box-shadow: none;
+
+    i {
+      color: #4a3c8c;
+    }
+  }
+}
