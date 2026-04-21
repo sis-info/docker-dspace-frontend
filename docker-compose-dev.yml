@@ -40,7 +40,7 @@ services:
       - frontend-logs:/dspace-ui-deploy/logs
 volumes:
   frontend-logs:
-
+  frontend-dist-data: 
 
 networks:
   frontend-network:
