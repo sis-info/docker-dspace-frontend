@@ -44,7 +44,9 @@ RUN addgroup -g 1001 -S dspace && \
     chown -R dspace:dspace /dspace-angular && \
     chown dspace:dspace /usr/local/bin/start-frontend.sh
 
-USER dspace
+# Mantener root al inicio para poder corregir permisos de volúmenes montados;
+# el script reduce privilegios a dspace antes de ejecutar build/servidor.
+RUN apk add --no-cache su-exec
 
 # Puerto de la aplicación (según config: port 4000)
 EXPOSE 4000

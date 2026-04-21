@@ -3,6 +3,15 @@
 # Script de inicio para DSpace Angular Frontend - ICANH
 # Optimizado con Rebuild Inteligente y persistencia de compilación
 
+# Si el contenedor inicia como root, ajustar permisos de volúmenes montados
+# y relanzar como usuario no-root para mantener seguridad.
+if [ "$(id -u)" = "0" ]; then
+    echo "Ajustando permisos de runtime para /dspace-ui-deploy..."
+    mkdir -p /dspace-ui-deploy/dist /dspace-ui-deploy/logs /dspace-ui-deploy/config
+    chown -R dspace:dspace /dspace-ui-deploy /dspace-angular
+    exec su-exec dspace /usr/local/bin/start-frontend.sh "$@"
+fi
+
 echo "============================================"
 echo "Iniciando DSpace Angular Frontend - Independiente..."
 echo "Backend externo: ${DSPACE_REST_HOST:-dspace-backend.local}"
