@@ -1,3 +1,12 @@
 ds-selectable-list-item-control {
   z-index: 1
 }
+
+.mt-4.mb-4.d-flex.ng-star-inserted {
+  margin: 0 1.5rem 1.5rem 0 !important;
+}
+.list-unstyled.ng-star-inserted {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0px;
+}
