@@ -49,6 +49,7 @@ npm-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 .history/*
+.github/
 
 # Miscellaneous
 /.angular/cache
@@ -177,3 +178,4 @@ Thumbs.db
 .yarn/install-state.gz
 .pnp.*
 
+yarn.lock
