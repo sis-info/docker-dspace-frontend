@@ -4332,6 +4332,15 @@
   // "item.page.image.alt.ROR": "ROR logo",
   "item.page.image.alt.ROR": "Logotipo de ROR",
 
+  // "item.page.title.alternative",
+  "item.page.title.alternative": "Titulo alternativo",
+
+  // "item.page.rights",
+  "item.page.rights": "Condiciones de uso",
+
+  // "item.page.rights.license",
+  "item.page.rights.license": "Licencia",
+
   // "item.preview.dc.identifier.uri": "Identifier:",
   "item.preview.dc.identifier.uri": "Identificador:",
 
